@@ -1,0 +1,22 @@
+{
+  "name": "Web2IPA Autonomous iOS Packager (Codespace)",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "forwardPorts": [8992],
+  "portsAttributes": {
+    "8992": {
+      "label": "Web2IPA Web Studio",
+      "onAutoForward": "openBrowser",
+      "visibility": "public"
+    }
+  },
+  "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt",
+  "postStartCommand": "nohup python3 agent.py --gui --port 8992 > /tmp/web2ipa.log 2>&1 &",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ]
+    }
+  }
+}

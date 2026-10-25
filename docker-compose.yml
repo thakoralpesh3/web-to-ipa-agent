@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  web2ipa:
+    build: .
+    container_name: web2ipa-studio
+    ports:
+      - "8992:8992"
+    volumes:
+      - ~/Web2IPA_Output:/root/Web2IPA_Output
+      - ~/Web2IPA_Dropzone:/root/Web2IPA_Dropzone
+      - ~/.web2ipa:/root/.web2ipa
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PORT=8992
+    restart: unless-stopped

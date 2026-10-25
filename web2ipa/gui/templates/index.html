@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web2IPA AI Studio | Universal iOS App Builder</title>
+    <!-- Offline-First Local Tailwind CSS -->
+    <script src="/static/tailwind.min.js" onerror="this.onerror=null;this.src='https://cdn.tailwindcss.com';"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    },
+                    colors: {
+                        ios: {
+                            blue: '#0a84ff',
+                            purple: '#5e5ce6',
+                            green: '#30d158',
+                            orange: '#ff9f0a',
+                            pink: '#ff375f',
+                            dark: '#000000',
+                            card: '#1c1c1e',
+                            border: '#2c2c2e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: radial-gradient(circle at top right, rgba(10, 132, 255, 0.08), transparent 45%),
+                        radial-gradient(circle at bottom left, rgba(94, 92, 230, 0.08), transparent 45%),
+                        #000000;
+            color: #f5f5f7;
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: rgba(28, 28, 30, 0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #000000; }
+        ::-webkit-scrollbar-thumb { background: #2c2c2e; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3a3a3c; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <!-- Header -->
+    <header class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-800">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 ring-2 ring-blue-400/30">
+                <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.61-.75 1.04-1.8 0.92-2.86-.9.04-2 .6-2.65 1.35-.56.64-1.06 1.7-0.93 2.73 1.01.08 2.05-.51 2.66-1.22z"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                    Web2IPA <span class="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">AI Studio</span>
+                    <span class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30">iOS 15+ Pro</span>
+                </h1>
+                <p class="text-xs text-zinc-400">Autonomous Web-to-iOS Compiler &bull; 1-Tap Safari Profile &bull; Standalone IPA &bull; Swift Xcode</p>
+            </div>
+        </div>
+
+        <div class="flex items-center flex-wrap gap-2.5">
+            <div id="network-badge" class="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-300 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span id="network-badge-txt">Checking status...</span>
+            </div>
+
+            <button onclick="openSecurityModal()" class="px-3.5 py-1.5 rounded-xl bg-zinc-900 border border-rose-500/40 text-xs text-rose-300 hover:border-rose-400 hover:text-white transition cursor-pointer flex items-center gap-1.5">
+                <span>🛡️</span>
+                <span>Cyber Shield</span>
+            </button>
+
+            <button onclick="openSurpriseModal()" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/50 text-xs text-amber-300 hover:border-amber-400 hover:text-white transition cursor-pointer">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                <span>💡 Surprise Me!</span>
+            </button>
+
+            <button onclick="openGrowthModal()" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/40 text-xs text-indigo-300 hover:border-indigo-400 transition cursor-pointer">
+                <span>🧠</span>
+                <span id="rank-badge">Apprentice iOS AI Builder</span>
+            </button>
+
+            <button onclick="openMobileAccessModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/40 text-xs text-blue-300 hover:border-blue-400 hover:text-white transition cursor-pointer flex items-center gap-1.5 shadow-lg shadow-blue-500/10">
+                <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                <span>📱 Mobile Access</span>
+            </button>
+
+            <button onclick="openOutputDir()" class="p-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500 transition cursor-pointer" title="Open Output Folder">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Column: Source Input & Config -->
+        <div class="lg:col-span-7 space-y-6">
+            
+            <!-- Source Selection Card -->
+            <div class="glass-panel p-6 rounded-3xl space-y-5">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                        1. Select Web Source
+                    </h2>
+                    <div class="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800 text-xs">
+                        <button type="button" onclick="switchMode('url')" id="tab-url" class="px-3 py-1 rounded-lg bg-blue-600 text-white font-medium transition">Live URL</button>
+                        <button type="button" onclick="switchMode('zip')" id="tab-zip" class="px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition">ZIP / Folder</button>
+                    </div>
+                </div>
+
+                <!-- URL Input Mode -->
+                <div id="mode-url" class="space-y-4">
+                    <div class="relative">
+                        <input type="url" id="input-url" placeholder="https://myapp.example.com" class="w-full bg-zinc-900/90 border border-zinc-700/80 rounded-2xl py-3.5 pl-4 pr-28 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                        <button type="button" onclick="inspectUrl()" id="btn-inspect-url" class="absolute right-2 top-2 px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl transition flex items-center gap-1.5 shadow-md shadow-blue-500/20">
+                            <span>🔍 Inspect</span>
+                        </button>
+                    </div>
+                    <p class="text-xs text-zinc-500">Auto-crawls Apple touch icons, theme colors, reverse-domain bundle IDs, and Web APIs.</p>
+                </div>
+
+                <!-- ZIP / Folder Upload Mode -->
+                <div id="mode-zip" class="hidden space-y-4">
+                    <div id="dropzone" onclick="document.getElementById('input-file').click()" class="border-2 border-dashed border-zinc-700 hover:border-blue-500/60 rounded-2xl p-6 text-center cursor-pointer transition bg-zinc-900/40 hover:bg-zinc-900/70">
+                        <input type="file" id="input-file" accept=".zip" class="hidden" onchange="handleFileSelect(event)">
+                        <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                        </div>
+                        <p class="text-sm font-medium text-white" id="file-label">Click or Drag & Drop HTML/JS/CSS ZIP</p>
+                        <p class="text-xs text-zinc-500 mt-1">Supports React, Vue, Vite, Next.js, Phaser, Three.js & Vanilla HTML5</p>
+                    </div>
+                    <div class="flex items-center gap-2 pt-1">
+                        <div class="relative flex-1">
+                            <input type="text" id="input-folder-path" placeholder="/path/to/my-web-project" class="w-full bg-zinc-900/80 border border-zinc-700/80 rounded-xl py-2 px-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500">
+                        </div>
+                        <button type="button" onclick="inspectFolder()" class="px-3.5 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold rounded-xl border border-zinc-700 transition cursor-pointer">📁 Inspect Folder</button>
+                    </div>
+                </div>
+
+                <!-- Live Auto-Inspection Blueprint Badge -->
+                <div id="blueprint-panel" class="hidden p-4 rounded-2xl bg-blue-950/30 border border-blue-500/30 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-blue-400 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                            Auto-Inspection Blueprint Extracted
+                        </span>
+                        <span id="detected-framework" class="text-xs font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">Vanilla HTML5</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-zinc-400">
+                        <span id="bp-app-name" class="font-bold text-white truncate max-w-[200px]">App Name</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-mono text-zinc-400" id="bp-bundle-id">com.web2ipa.app</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700" id="bp-theme-badge">#000000</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-500/30" id="bp-perms-count">0 iOS Perms</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- App Icon & Brand Logo Card -->
+            <div class="glass-panel p-6 rounded-3xl space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                        2. App Icon & Brand Logo
+                    </h2>
+                    <span id="logo-source-badge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700">
+                        🔷 Default Badge
+                    </span>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800">
+                    <!-- Squircle Preview with quick click -->
+                    <div class="relative group cursor-pointer" onclick="document.getElementById('custom-icon-input').click()" title="Click to change logo picture">
+                        <img id="logo-preview-img" src="/assets/web2ipa-icon.png" onerror="this.src='/assets/web2ipa-icon.png'" class="w-20 h-20 rounded-2xl object-cover border-2 border-blue-500/40 shadow-xl shadow-blue-500/20 bg-zinc-950 transition group-hover:scale-105 group-hover:border-blue-400" alt="App Logo">
+                        <div class="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-[10px] text-white transition font-medium">
+                            <span class="text-sm">📷</span>
+                            <span>Change</span>
+                        </div>
+                    </div>
+
+                    <!-- Details & Action Buttons -->
+                    <div class="flex-1 text-center sm:text-left space-y-2">
+                        <div>
+                            <p class="text-sm font-bold text-white" id="logo-name-display">Application Icon</p>
+                            <p class="text-xs text-zinc-400" id="logo-desc-display">Auto-detects from project assets or upload a custom image (PNG, JPG, SVG, WebP).</p>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                            <button type="button" onclick="document.getElementById('custom-icon-input').click()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-500/20 transition flex items-center gap-1.5 cursor-pointer">
+                                <span>🖼️</span>
+                                <span>Change Logo Picture</span>
+                            </button>
+                            <button type="button" onclick="triggerAutoDetectLogo()" id="btn-autodetect-logo" class="px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-medium transition flex items-center gap-1.5 cursor-pointer">
+                                <span>🔍</span>
+                                <span>Auto-detect Logo</span>
+                            </button>
+                            <button type="button" onclick="resetToDefaultLogo()" id="btn-reset-logo" class="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 border border-zinc-700 text-xs transition cursor-pointer hidden" title="Reset to auto-detected/default">
+                                <span>↺ Reset</span>
+                            </button>
+                        </div>
+                    </div>
+                    <input type="file" id="custom-icon-input" accept="image/*,.svg" class="hidden" onchange="handleCustomIcon(event)">
+                </div>
+            </div>
+
+            <!-- iOS Configuration Card -->
+            <div class="glass-panel p-6 rounded-3xl space-y-5">
+                <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                    3. iOS Application Settings
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-400 mb-1.5">App Display Name</label>
+                        <input type="text" id="cfg-app-name" value="My iOS App" class="w-full bg-zinc-900/80 border border-zinc-700/80 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-400 mb-1.5">Bundle Identifier (App ID)</label>
+                        <input type="text" id="cfg-bundle-id" value="com.web2ipa.app" class="w-full bg-zinc-900/80 border border-zinc-700/80 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-400 mb-1.5">Version</label>
+                        <input type="text" id="cfg-version-name" value="1.0.0" class="w-full bg-zinc-900/80 border border-zinc-700/80 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-400 mb-1.5">Orientation</label>
+                        <select id="cfg-orientation" class="w-full bg-zinc-900/80 border border-zinc-700/80 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <option value="sensor">Universal (Auto-Rotate)</option>
+                            <option value="portrait">Portrait Only</option>
+                            <option value="landscape">Landscape Only</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-400 mb-1.5">Theme Color</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" id="cfg-theme-color-picker" value="#000000" onchange="document.getElementById('cfg-theme-color').value = this.value" class="w-9 h-9 rounded-xl bg-transparent border-0 cursor-pointer">
+                            <input type="text" id="cfg-theme-color" value="#000000" onchange="document.getElementById('cfg-theme-color-picker').value = this.value" class="flex-1 bg-zinc-900/80 border border-zinc-700/80 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toggles & Permissions -->
+                <div class="pt-2 border-t border-zinc-800/80 space-y-3">
+                    <label class="block text-xs font-medium text-zinc-400">iOS Permissions & Capabilities</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 cursor-pointer hover:border-zinc-700">
+                            <input type="checkbox" id="perm-camera" class="rounded text-blue-600 focus:ring-0">
+                            <span class="text-zinc-300">📷 Camera</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 cursor-pointer hover:border-zinc-700">
+                            <input type="checkbox" id="perm-mic" class="rounded text-blue-600 focus:ring-0">
+                            <span class="text-zinc-300">🎙️ Microphone</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 cursor-pointer hover:border-zinc-700">
+                            <input type="checkbox" id="perm-location" class="rounded text-blue-600 focus:ring-0">
+                            <span class="text-zinc-300">📍 Location</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 cursor-pointer hover:border-zinc-700">
+                            <input type="checkbox" id="perm-photos" class="rounded text-blue-600 focus:ring-0" checked>
+                            <span class="text-zinc-300">🖼️ Photos</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button type="button" onclick="startBuild()" id="btn-build" class="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-base shadow-lg shadow-blue-500/25 transition cursor-pointer flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.61-.75 1.04-1.8 0.92-2.86-.9.04-2 .6-2.65 1.35-.56.64-1.06 1.7-0.93 2.73 1.01.08 2.05-.51 2.66-1.22z"/>
+                    </svg>
+                    <span>Synthesize & Build iOS App (.IPA + .mobileconfig)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Column: Live Terminal & Deliverables -->
+        <div class="lg:col-span-5 space-y-6">
+            
+            <!-- Terminal & Progress Card -->
+            <div class="glass-panel p-6 rounded-3xl space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                        Live Build Stream
+                    </h2>
+                    <span id="build-status-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">Idle</span>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full h-2.5 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800">
+                    <div id="progress-fill" class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 w-0 transition-all duration-300"></div>
+                </div>
+
+                <!-- Terminal Output Box -->
+                <div id="terminal-box" class="bg-black/90 font-mono text-xs text-zinc-300 p-4 rounded-2xl h-80 overflow-y-auto border border-zinc-800/80 space-y-1 leading-relaxed">
+                    <div class="text-zinc-500">// Web2IPA Autonomous Engine Initialized...</div>
+                    <div class="text-zinc-500">// Ready to inspect URL or stage web archive.</div>
+                </div>
+            </div>
+
+            <!-- Deliverables & Quick Actions Card -->
+            <div id="results-card" class="glass-panel p-6 rounded-3xl space-y-4 hidden">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-emerald-400 flex items-center gap-2">
+                        <span>🎉</span>
+                        Build Complete
+                    </h2>
+                    <button onclick="openQrModal()" class="text-xs px-3 py-1 rounded-xl bg-blue-600/30 text-blue-300 border border-blue-500/40 hover:bg-blue-600 hover:text-white transition cursor-pointer">
+                        📱 Deliverables & QR Hub
+                    </button>
+                </div>
+
+                <div class="space-y-2">
+                    <button type="button" onclick="openSimulator()" class="w-full p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-semibold text-sm shadow-lg shadow-emerald-500/25 transition flex items-center justify-between cursor-pointer">
+                        <span class="flex items-center gap-2">
+                            <span class="text-base">▶️</span>
+                            <span>Test & Run in iPhone Simulator</span>
+                        </span>
+                        <span class="text-xs bg-white/20 px-2.5 py-1 rounded-lg font-mono">Simulate</span>
+                    </button>
+                    <a id="res-link-live" href="#" target="_blank" class="block p-3.5 rounded-2xl bg-emerald-600/15 border border-emerald-500/30 hover:border-emerald-400 transition text-sm font-semibold text-emerald-300 flex items-center justify-between hidden">
+                        <span class="flex items-center gap-2">
+                            <span>🚀</span>
+                            <span>Launch Live Web App (New Tab)</span>
+                        </span>
+                        <span class="text-xs text-emerald-400">&rarr; Open</span>
+                    </a>
+                    <a id="res-link-profile" href="#" class="block p-3.5 rounded-2xl bg-blue-600/15 border border-blue-500/30 hover:border-blue-400 transition text-sm font-semibold text-blue-300 flex items-center justify-between">
+                        <span class="flex items-center gap-2">
+                            <span>⚡</span>
+                            <span>Install Safari WebClip (.mobileconfig)</span>
+                        </span>
+                        <span class="text-xs text-blue-400">&darr; Install</span>
+                    </a>
+                    <a id="res-link-ipa" href="#" download class="block p-3.5 rounded-2xl bg-zinc-900/70 border border-zinc-800 hover:border-zinc-700 transition text-sm font-semibold text-zinc-200 flex items-center justify-between">
+                        <span class="flex items-center gap-2">
+                            <span>📦</span>
+                            <span>Standalone Sideload IPA (.ipa)</span>
+                        </span>
+                        <span class="text-xs text-zinc-400" id="res-ipa-size">0.0 MB</span>
+                    </a>
+                    <a id="res-link-zip" href="#" download class="block p-3.5 rounded-2xl bg-zinc-900/70 border border-zinc-800 hover:border-zinc-700 transition text-sm font-semibold text-zinc-200 flex items-center justify-between">
+                        <span class="flex items-center gap-2">
+                            <span>🛠️</span>
+                            <span>Native Swift Xcode Project (.ZIP)</span>
+                        </span>
+                        <span class="text-xs text-zinc-400">&darr; Source</span>
+                    </a>
+
+                    <!-- Share Section in Results Card -->
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-800/80">
+                        <button type="button" onclick="shareApp()" class="p-2.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-300 hover:text-white font-semibold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                            <span>📤</span>
+                            <span>Share App</span>
+                        </button>
+                        <button type="button" onclick="shareViaWhatsApp()" class="p-2.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 hover:text-white font-semibold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                            <span>💬</span>
+                            <span>WhatsApp</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Project Chhaya Mobile Remote Access Modal -->
+    <div id="modal-mobile-access" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-panel rounded-3xl p-6 md:p-8 max-w-xl w-full border border-blue-500/40 text-left space-y-5 shadow-2xl relative max-h-[92vh] overflow-y-auto">
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-blue-500/20">
+                        📱
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            Mobile Access <span class="text-xs font-mono px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30">Project Chhaya</span>
+                        </h3>
+                        <p class="text-xs text-zinc-400">Control Web2IPA Studio directly from your iPhone or iPad</p>
+                    </div>
+                </div>
+                <button onclick="closeMobileAccessModal()" class="text-zinc-400 hover:text-white text-xl p-1.5 transition cursor-pointer">✕</button>
+            </div>
+
+            <!-- Content Grid: QR Code & Links -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+                <!-- QR Code Box -->
+                <div class="p-4 bg-zinc-900/90 rounded-2xl border border-zinc-800 text-center flex flex-col items-center justify-center">
+                    <div class="p-2 bg-black rounded-xl border border-blue-500/30 shadow-inner inline-block">
+                        <img id="mobile-qr-img" src="" alt="Mobile Access QR" class="w-44 h-44 rounded-lg object-contain mx-auto">
+                    </div>
+                    <p class="text-[11px] font-semibold text-blue-300 mt-2.5 flex items-center justify-center gap-1">
+                        <span>📷</span>
+                        <span>Scan with iPhone Camera</span>
+                    </p>
+                    <p class="text-[10px] text-zinc-400 mt-0.5">Opens iOS WebClip & IPA Studio on your phone</p>
+                </div>
+
+                <!-- URLs & Actions -->
+                <div class="space-y-3.5">
+                    <!-- Worldwide Public Cloudflare Tunnel -->
+                    <div class="p-3 bg-zinc-900/80 rounded-xl border border-blue-500/30 space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-blue-300 flex items-center gap-1">
+                                <span>🌐</span> Worldwide 4G/5G Public URL
+                            </span>
+                            <span id="mobile-tunnel-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30">Active</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <input id="mobile-public-url" type="text" readonly class="w-full bg-black border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 font-mono select-all">
+                            <button onclick="copyMobileUrl('public')" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold whitespace-nowrap transition cursor-pointer">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-zinc-400">Access from anywhere without Wi-Fi router port configuration</p>
+                    </div>
+
+                    <!-- Local Wi-Fi / Hotspot LAN -->
+                    <div class="p-3 bg-zinc-900/80 rounded-xl border border-zinc-800 space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-zinc-300 flex items-center gap-1">
+                                <span>📶</span> Local Wi-Fi / Hotspot LAN
+                            </span>
+                            <span class="text-[10px] text-zinc-500 font-mono">High-Speed</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <input id="mobile-local-url" type="text" readonly class="w-full bg-black border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 font-mono select-all">
+                            <button onclick="copyMobileUrl('local')" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold whitespace-nowrap transition cursor-pointer">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-zinc-400">Available to devices on the same Wi-Fi or Linux hotspot</p>
+                    </div>
+
+                    <!-- Tunnel Controls -->
+                    <div class="flex items-center gap-2 pt-1">
+                        <button id="btn-toggle-tunnel" onclick="toggleMobileTunnel()" class="flex-1 py-2 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs text-zinc-300 font-semibold transition cursor-pointer text-center">
+                            🔄 Refresh Mobile Links
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Capabilities Banner -->
+            <div class="p-3 bg-blue-950/20 border border-blue-500/20 rounded-2xl flex items-center gap-3">
+                <span class="text-xl">🍏</span>
+                <p class="text-xs text-zinc-300">
+                    <strong class="text-blue-300">Mobile iOS Studio:</strong> Build 1-Tap Safari profiles and sideload IPAs directly from your iPhone, upload icons from Photos, and install profiles with 1 tap!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- iOS Deliverables & QR Code Download Modal -->
+    <div id="modal-qr" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel max-w-lg w-full p-6 rounded-3xl space-y-4 border border-zinc-700 shadow-2xl max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xl shadow-lg shadow-emerald-500/20">
+                        🎉
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            iOS App Deliverables Ready!
+                        </h3>
+                        <p class="text-xs text-zinc-400">Download, install or share your compiled iOS application</p>
+                    </div>
+                </div>
+                <button onclick="closeQrModal()" class="text-zinc-400 hover:text-white text-xl p-1 leading-none cursor-pointer">&times;</button>
+            </div>
+
+            <!-- Direct Installation & Download Options -->
+            <div class="space-y-2 pt-1">
+                <!-- 1-Tap Direct Install on iPhone / iPad -->
+                <a id="modal-dl-profile" href="#" class="w-full p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs shadow-lg shadow-emerald-500/25 transition flex items-center justify-between cursor-pointer">
+                    <span class="flex items-center gap-3">
+                        <span class="text-xl">⚡</span>
+                        <div class="text-left">
+                            <div class="font-bold text-sm">1-Tap Direct Install on iPhone / iPad</div>
+                            <div class="text-[10px] text-emerald-200">Opens Safari WebClip profile &rarr; adds native app icon to Home Screen</div>
+                        </div>
+                    </span>
+                    <span class="text-xs bg-white/20 px-2.5 py-1 rounded-lg font-mono font-bold">&darr; 1-Tap Install</span>
+                </a>
+
+                <!-- Instant Run in Safari / Browser -->
+                <a id="modal-link-live" href="#" target="_blank" class="w-full p-3 rounded-xl bg-cyan-950/50 hover:bg-cyan-900/60 border border-cyan-500/40 text-cyan-200 font-semibold text-xs transition flex items-center justify-between cursor-pointer hidden">
+                    <span class="flex items-center gap-2">
+                        <span>🚀</span>
+                        <span>Launch & Run Web App in Safari (Instant)</span>
+                    </span>
+                    <span class="text-xs bg-cyan-500/20 px-2 py-0.5 rounded font-mono">&rarr; Open</span>
+                </a>
+
+                <!-- Standalone Sideload IPA -->
+                <a id="modal-dl-ipa" href="#" download class="w-full p-3 rounded-xl bg-blue-950/40 border border-blue-600/40 hover:border-blue-400 text-white font-medium text-xs transition flex items-center justify-between cursor-pointer">
+                    <span class="flex items-center gap-2.5">
+                        <span class="text-lg">📦</span>
+                        <div class="text-left">
+                            <div class="font-semibold text-xs text-blue-200">Download Sideload IPA (.ipa)</div>
+                            <div class="text-[10px] text-zinc-400">For PC Sideloading (AltStore, Sideloadly, TrollStore, Scarlet)</div>
+                        </div>
+                    </span>
+                    <span class="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded font-mono font-bold" id="modal-ipa-size">0.0 MB</span>
+                </a>
+
+                <!-- iOS Quick Install & Preview Guidance Notice -->
+                <div class="text-[11px] text-amber-200 bg-amber-950/40 border border-amber-500/30 rounded-xl p-3 space-y-1.5">
+                    <div class="font-bold flex items-center gap-1.5 text-amber-300">
+                        <span>📲</span>
+                        <span>How to Install on iPhone / iPad (Zero PC):</span>
+                    </div>
+                    <ol class="list-decimal list-inside space-y-1 text-zinc-300">
+                        <li>Tap <strong class="text-white">⚡ 1-Tap Direct Install</strong> (in Safari).</li>
+                        <li>When Safari asks <em>"This website is trying to download a configuration profile"</em>, tap <strong class="text-white">Allow</strong>.</li>
+                        <li>Open iPhone <strong class="text-white">Settings</strong> &rarr; tap <strong class="text-emerald-300">Profile Downloaded</strong> (at top) &rarr; tap <strong class="text-emerald-300">Install</strong>. Done!</li>
+                    </ol>
+                    <div class="text-[10px] text-zinc-400 pt-1 border-t border-amber-500/20">
+                        ℹ️ <strong>Why does .IPA show "Unable to preview"?</strong> Raw <code>.ipa</code> files are application archives meant for AltStore on PC, and cannot be opened from the iOS Files app. Use <strong>1-Tap Install</strong> or <strong>Launch Live Web App</strong> for direct mobile use!
+                    </div>
+                </div>
+
+                <!-- Swift Xcode Project -->
+                <a id="modal-dl-zip" href="#" download class="w-full p-3 rounded-xl bg-zinc-900/90 border border-zinc-700 hover:border-zinc-500 text-white font-medium text-xs transition flex items-center justify-between cursor-pointer">
+                    <span class="flex items-center gap-2">
+                        <span>🛠️</span>
+                        <span>Download Swift Xcode Project (.zip)</span>
+                    </span>
+                    <span class="text-xs text-zinc-400">&darr; Source Code</span>
+                </a>
+
+                <!-- Test in Simulator -->
+                <button type="button" onclick="openSimulator()" class="w-full p-3 rounded-xl bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-500/40 hover:border-indigo-400 text-indigo-200 font-semibold text-xs transition flex items-center justify-between cursor-pointer">
+                    <span class="flex items-center gap-2">
+                        <span>▶️</span>
+                        <span>Open & Test in Live iPhone Simulator</span>
+                    </span>
+                    <span class="text-xs bg-indigo-500/20 px-2 py-0.5 rounded font-mono">&rarr; Test Now</span>
+                </button>
+            </div>
+
+            <!-- Share App Section -->
+            <div class="p-3.5 bg-zinc-900/90 rounded-2xl border border-zinc-800 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                        <span>📤</span>
+                        <span>Share App with Mobile & Friends</span>
+                    </span>
+                    <span class="text-[10px] text-zinc-400 font-mono">1-Tap Share</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="shareApp()" class="w-full p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span>📤</span>
+                        <span>Share App...</span>
+                    </button>
+                    <button type="button" onclick="shareViaWhatsApp()" class="w-full p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md shadow-emerald-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span>💬</span>
+                        <span>WhatsApp</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-1.5 pt-1">
+                    <input id="modal-share-input" type="text" readonly class="w-full bg-black border border-zinc-700 rounded-lg px-2.5 py-1.5 text-[11px] text-zinc-300 font-mono select-all">
+                    <button type="button" onclick="copyModalDownloadUrl()" id="btn-copy-url" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold whitespace-nowrap transition cursor-pointer">
+                        📋 Copy
+                    </button>
+                </div>
+            </div>
+
+            <!-- QR Code Box -->
+            <div class="text-center space-y-2 p-3 bg-zinc-900/60 rounded-2xl border border-zinc-800">
+                <div class="bg-black p-2.5 rounded-xl inline-block border border-zinc-800 shadow-inner">
+                    <img id="modal-qr-img" src="" class="w-40 h-40 object-contain mx-auto" alt="QR Code">
+                </div>
+                <p class="text-[11px] text-zinc-400">Scan with iPhone Camera to install directly over Wi-Fi</p>
+            </div>
+
+            <button onclick="closeQrModal()" class="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-xs font-semibold transition cursor-pointer">
+                Done
+            </button>
+        </div>
+    </div>
+
+    <!-- Interactive Live iPhone Web Simulator Modal -->
+    <div id="modal-simulator" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-3 hidden">
+        <div class="relative flex flex-col items-center max-w-sm sm:max-w-md w-full">
+            <!-- Simulator Control Toolbar -->
+            <div class="w-full flex items-center justify-between mb-2.5 px-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-xs font-bold text-white font-mono truncate max-w-[130px]" id="sim-app-title">iPhone Simulator</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <a id="sim-top-dl-ipa" href="#" download title="Download IPA" class="p-1.5 rounded-lg bg-blue-600/30 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 transition text-xs flex items-center gap-1 cursor-pointer">
+                        <span>📦</span>
+                        <span class="hidden sm:inline text-[11px]">.IPA</span>
+                    </a>
+                    <a id="sim-top-dl-profile" href="#" title="Install Profile" class="p-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 transition text-xs flex items-center gap-1 cursor-pointer">
+                        <span>⚡</span>
+                        <span class="hidden sm:inline text-[11px]">Profile</span>
+                    </a>
+                    <button type="button" onclick="shareApp()" title="Share App" class="p-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/40 transition text-xs flex items-center gap-1 cursor-pointer">
+                        <span>📤</span>
+                        <span class="hidden sm:inline text-[11px]">Share</span>
+                    </button>
+                    <button type="button" onclick="openQrModal()" title="View Deliverables & QR Code" class="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition text-xs flex items-center gap-1 cursor-pointer">
+                        <span>📱</span>
+                        <span class="hidden sm:inline text-[11px]">Hub</span>
+                    </button>
+                    <button type="button" onclick="reloadSimulator()" title="Reload Simulator" class="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition text-xs flex items-center gap-1 cursor-pointer">
+                        <span>🔄</span>
+                    </button>
+                    <button type="button" onclick="closeSimulator()" class="p-1.5 rounded-lg bg-rose-900/60 hover:bg-rose-800 text-rose-200 transition text-xs cursor-pointer leading-none px-2.5">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            <!-- iPhone 16 Pro Frame Shell -->
+            <div class="relative w-[340px] sm:w-[370px] h-[640px] sm:h-[680px] bg-zinc-950 rounded-[48px] border-[10px] border-zinc-800 shadow-2xl shadow-blue-500/10 flex flex-col overflow-hidden ring-1 ring-white/10">
+                <!-- Top Island Bar (Speaker + Dynamic Island Capsule) -->
+                <div class="h-9 w-full bg-zinc-950 flex items-center justify-center relative select-none shrink-0 z-10">
+                    <div class="w-28 h-5 bg-black rounded-full border border-zinc-800 flex items-center justify-end px-3">
+                        <span class="w-2 h-2 rounded-full bg-zinc-900 border border-zinc-700"></span>
+                    </div>
+                </div>
+
+                <!-- Live Embedded Web Application -->
+                <div class="flex-1 w-full relative bg-zinc-900 overflow-hidden">
+                    <iframe id="simulator-iframe" src="about:blank" class="w-full h-full border-0 select-none bg-zinc-950" allow="autoplay; camera; microphone; geolocation; accelerometer; gyroscope; payment; display-capture"></iframe>
+                    <div id="simulator-loader" class="absolute inset-0 bg-zinc-950 flex flex-col items-center justify-center gap-3 transition-opacity duration-300">
+                        <div class="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+                        <p class="text-xs text-zinc-400 font-mono">Loading App in Simulator...</p>
+                    </div>
+                </div>
+
+                <!-- Bottom Home Indicator Bar -->
+                <div class="h-5 w-full bg-zinc-950 flex items-center justify-center shrink-0 select-none z-10">
+                    <div class="w-28 h-1 rounded-full bg-zinc-600"></div>
+                </div>
+            </div>
+
+            <!-- Simulator Quick Action Footer with Direct Downloads & Share -->
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 px-1">
+                <a id="sim-footer-dl-ipa" href="#" download class="py-2.5 px-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span>📦</span>
+                    <span>Download .IPA</span>
+                </a>
+                <a id="sim-footer-dl-profile" href="#" class="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md shadow-emerald-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span>⚡</span>
+                    <span>Install Profile</span>
+                </a>
+                <button type="button" onclick="shareApp()" class="py-2.5 px-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-semibold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span>📤</span>
+                    <span>Share App</span>
+                </button>
+                <button type="button" onclick="openQrModal()" class="py-2.5 px-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-semibold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span>📱</span>
+                    <span>QR & Links</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Surprise Me Modal -->
+    <div id="modal-surprise" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel max-w-lg w-full p-6 rounded-3xl space-y-4 border border-zinc-700">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-amber-300 flex items-center gap-2">
+                    <span>💡</span>
+                    Autonomous iOS Innovations
+                </h3>
+                <button onclick="closeSurpriseModal()" class="text-zinc-400 hover:text-white">&times;</button>
+            </div>
+            <div id="surprise-list" class="space-y-3">
+                <p class="text-xs text-zinc-400">Loading dynamic suggestions...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security SAST Modal -->
+    <div id="modal-security" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel max-w-lg w-full p-6 rounded-3xl space-y-4 border border-zinc-700">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-rose-300 flex items-center gap-2">
+                    <span>🛡️</span>
+                    Cyber Defense SAST Shield
+                </h3>
+                <button onclick="closeSecurityModal()" class="text-zinc-400 hover:text-white">&times;</button>
+            </div>
+            <div class="space-y-2 text-xs text-zinc-300">
+                <p>Audits against OWASP Top 10, DOM-based XSS, credential leaks, and App Transport Security (ATS).</p>
+                <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800 space-y-1">
+                    <div class="flex justify-between font-bold text-emerald-400">
+                        <span>Security Health Grade</span>
+                        <span>A+ (Shield Active)</span>
+                    </div>
+                    <p class="text-zinc-400">0 Critical Sinks &bull; SSRF Filter Enabled &bull; WKWebView Sandboxed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Growth Modal -->
+    <div id="modal-growth" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel max-w-lg w-full p-6 rounded-3xl space-y-4 border border-zinc-700">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-indigo-300 flex items-center gap-2">
+                    <span>🧠</span>
+                    Agent Evolution & Learning Memory
+                </h3>
+                <button onclick="closeGrowthModal()" class="text-zinc-400 hover:text-white">&times;</button>
+            </div>
+            <div id="growth-details" class="space-y-3 text-xs text-zinc-300">
+                <p>Loading evolution experience...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'url';
+        let autoDetectedLogoPath = null;
+        let autoDetectedLogoBase64 = null;
+        let customIconPath = null;
+        let customIconFile = null;
+        let activeDownloadUrl = null;
+        let activePreviewUrl = null;
+        let activeTargetUrl = null;
+
+        function log(msg, color = 'text-zinc-300') {
+            const box = document.getElementById('terminal-box');
+            const d = document.createElement('div');
+            d.className = color;
+            d.textContent = msg;
+            box.appendChild(d);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('mode-url').classList.toggle('hidden', mode !== 'url');
+            document.getElementById('mode-zip').classList.toggle('hidden', mode !== 'zip');
+            document.getElementById('tab-url').className = mode === 'url' ? 'px-3 py-1 rounded-lg bg-blue-600 text-white font-medium transition' : 'px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition';
+            document.getElementById('tab-zip').className = mode === 'zip' ? 'px-3 py-1 rounded-lg bg-blue-600 text-white font-medium transition' : 'px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition';
+        }
+
+        async function inspectUrl() {
+            const url = document.getElementById('input-url').value.trim();
+            if (!url) return alert('Please enter a website URL');
+
+            log(`[Inspector] Deeply crawling iOS metadata for ${url}...`, 'text-blue-400');
+            const fd = new FormData();
+            fd.append('url', url);
+
+            try {
+                const res = await fetch('/api/inspect-url', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    populateBlueprint(data);
+                } else {
+                    log(`[Inspector Error] ${data.error}`, 'text-rose-400');
+                }
+            } catch (err) {
+                log(`[Inspector Error] ${err}`, 'text-rose-400');
+            }
+        }
+
+        function populateBlueprint(bp) {
+            document.getElementById('blueprint-panel').classList.remove('hidden');
+            document.getElementById('bp-app-name').textContent = bp.app_name || 'iOS App';
+            document.getElementById('bp-bundle-id').textContent = bp.bundle_id || 'com.web2ipa.app';
+            document.getElementById('bp-theme-badge').textContent = bp.theme_color || '#000000';
+            
+            const perms = Object.keys(bp.ios_permissions || {});
+            document.getElementById('bp-perms-count').textContent = `${perms.length} iOS Perms`;
+
+            document.getElementById('cfg-app-name').value = bp.app_name || 'My iOS App';
+            document.getElementById('cfg-bundle-id').value = bp.bundle_id || 'com.web2ipa.app';
+            if (bp.theme_color) {
+                document.getElementById('cfg-theme-color').value = bp.theme_color;
+                document.getElementById('cfg-theme-color-picker').value = bp.theme_color;
+            }
+
+            autoDetectedLogoPath = bp.local_logo_path || bp.icon_path || null;
+            autoDetectedLogoBase64 = bp.logo_base64 || bp.icon_base64 || null;
+
+            // Only update active preview if user hasn't uploaded a custom icon
+            if (!customIconPath && !customIconFile) {
+                const previewImg = document.getElementById('logo-preview-img');
+                const badge = document.getElementById('logo-source-badge');
+                const desc = document.getElementById('logo-desc-display');
+                if (autoDetectedLogoBase64) {
+                    previewImg.src = autoDetectedLogoBase64;
+                    badge.textContent = '✨ Auto-detected from project';
+                    badge.className = 'text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                    desc.textContent = `Auto-detected from ${bp.icon_source || 'project assets'}.`;
+                    document.getElementById('btn-reset-logo').classList.add('hidden');
+                } else {
+                    previewImg.src = '/assets/web2ipa-icon.png';
+                    badge.textContent = '🔷 Default Badge';
+                    badge.className = 'text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700';
+                    desc.textContent = 'Using synthesized Cupertino monogram squircle.';
+                }
+            }
+
+            // Check detected permissions
+            if (perms.includes('NSCameraUsageDescription')) document.getElementById('perm-camera').checked = true;
+            if (perms.includes('NSMicrophoneUsageDescription')) document.getElementById('perm-mic').checked = true;
+            if (perms.includes('NSLocationWhenInUseUsageDescription')) document.getElementById('perm-location').checked = true;
+
+            log(`[Inspector] Successfully analyzed app "${bp.app_name}" (${bp.bundle_id})`, 'text-emerald-400');
+        }
+
+        async function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('file-label').textContent = file.name;
+                const cleanName = file.name.replace('.zip', '').replace(/[-_]/g, ' ');
+                document.getElementById('cfg-app-name').value = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+                document.getElementById('cfg-bundle-id').value = `com.web2ipa.${file.name.replace('.zip', '').toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+                log(`[Source] Loaded local ZIP: ${file.name}. Auto-inspecting assets & brand logo...`, 'text-indigo-400');
+
+                // Autodetect logo and project metadata from ZIP
+                const fd = new FormData();
+                fd.append('mode', 'zip');
+                fd.append('file', file);
+                try {
+                    const res = await fetch('/api/inspect', { method: 'POST', body: fd });
+                    const data = await res.json();
+                    if (data.success) {
+                        populateBlueprint(data);
+                    }
+                } catch (err) {
+                    console.warn('Auto-inspect error:', err);
+                }
+            }
+        }
+
+        async function handleCustomIcon(e) {
+            const file = e.target.files[0];
+            if (file) {
+                customIconFile = file;
+                const reader = new FileReader();
+                reader.onload = (re) => {
+                    document.getElementById('logo-preview-img').src = re.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                const badge = document.getElementById('logo-source-badge');
+                badge.textContent = '⏳ Processing logo...';
+                badge.className = 'text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30';
+
+                log(`[Icon] Validating & caching custom logo picture: ${file.name}...`, 'text-amber-400');
+
+                const fd = new FormData();
+                fd.append('icon_file', file);
+                fd.append('app_name', document.getElementById('cfg-app-name').value || 'iOS App');
+
+                try {
+                    const res = await fetch('/api/upload-icon', { method: 'POST', body: fd });
+                    const data = await res.json();
+                    if (data.success) {
+                        customIconPath = data.icon_path;
+                        document.getElementById('logo-preview-img').src = data.icon_base64;
+                        badge.textContent = '🎨 Custom Uploaded Logo';
+                        badge.className = 'text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30';
+                        document.getElementById('logo-desc-display').textContent = `Custom logo: ${file.name}`;
+                        document.getElementById('btn-reset-logo').classList.remove('hidden');
+                        log(`[Icon] Custom logo verified and normalized for iOS!`, 'text-emerald-400');
+                    } else {
+                        log(`[Icon Error] ${data.error}`, 'text-rose-400');
+                        badge.textContent = '⚠️ Format Error';
+                        badge.className = 'text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30';
+                    }
+                } catch (err) {
+                    log(`[Icon Error] Could not process icon: ${err}`, 'text-rose-400');
+                }
+            }
+        }
+
+        async function triggerAutoDetectLogo() {
+            if (currentMode === 'url') {
+                const url = document.getElementById('input-url').value.trim();
+                if (!url) return alert('Please enter a website URL first');
+                inspectUrl();
+            } else {
+                const zipFile = document.getElementById('input-file').files[0];
+                if (!zipFile) return alert('Please select a project ZIP file first');
+                log(`[Inspector] Re-scanning project ZIP for brand icons...`, 'text-blue-400');
+                const fd = new FormData();
+                fd.append('mode', 'zip');
+                fd.append('file', zipFile);
+                try {
+                    const res = await fetch('/api/inspect', { method: 'POST', body: fd });
+                    const data = await res.json();
+                    if (data.success) {
+                        // Clear custom icon override to show autodetected
+                        customIconPath = null;
+                        customIconFile = null;
+                        document.getElementById('custom-icon-input').value = '';
+                        populateBlueprint(data);
+                    }
+                } catch (err) {
+                    log(`[Inspector Error] ${err}`, 'text-rose-400');
+                }
+            }
+        }
+
+        function resetToDefaultLogo() {
+            customIconPath = null;
+            customIconFile = null;
+            document.getElementById('custom-icon-input').value = '';
+            document.getElementById('btn-reset-logo').classList.add('hidden');
+
+            const previewImg = document.getElementById('logo-preview-img');
+            const badge = document.getElementById('logo-source-badge');
+            const desc = document.getElementById('logo-desc-display');
+
+            if (autoDetectedLogoBase64) {
+                previewImg.src = autoDetectedLogoBase64;
+                badge.textContent = '✨ Auto-detected from project';
+                badge.className = 'text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                desc.textContent = 'Reverted to auto-detected project logo.';
+            } else {
+                previewImg.src = '/assets/web2ipa-icon.png';
+                badge.textContent = '🔷 Default Badge';
+                badge.className = 'text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700';
+                desc.textContent = 'Reverted to synthesized Cupertino monogram squircle.';
+            }
+            log(`[Icon] Reset logo to default/autodetected.`, 'text-zinc-400');
+        }
+
+        function copyModalDownloadUrl() {
+            const urlToCopy = activeDownloadUrl || window.location.href;
+            if (!urlToCopy) return;
+            navigator.clipboard.writeText(urlToCopy).then(() => {
+                const btn = document.getElementById('btn-copy-url');
+                if (btn) {
+                    const originalText = btn.textContent;
+                    btn.textContent = '✓ Copied!';
+                    btn.className = 'px-3 py-1.5 rounded-lg bg-emerald-800 text-emerald-200 border border-emerald-600 text-xs font-semibold whitespace-nowrap transition';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.className = 'px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold whitespace-nowrap transition cursor-pointer';
+                    }, 2000);
+                }
+                showShareToast('✓ Download link copied to clipboard!');
+            }).catch(() => {
+                const input = document.getElementById('modal-share-input');
+                if (input) {
+                    input.select();
+                    document.execCommand('copy');
+                    showShareToast('✓ Download link copied to clipboard!');
+                }
+            });
+        }
+
+        async function shareApp() {
+            const nameInput = document.getElementById('cfg-app-name') || document.getElementById('bp-app-name');
+            const appTitle = nameInput ? (nameInput.value || nameInput.textContent || 'iOS App') : 'iOS App';
+            const shareUrl = activeDownloadUrl || window.location.href;
+            const shareData = {
+                title: appTitle,
+                text: `Install ${appTitle} on your iPhone / iPad:`,
+                url: shareUrl
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                    showShareToast("✓ App shared successfully!");
+                    return;
+                } catch (err) {
+                    if (err.name === 'AbortError') return; // Cancelled by user
+                    console.warn("navigator.share failed, fallback to clipboard:", err);
+                }
+            }
+
+            try {
+                await navigator.clipboard.writeText(`${shareData.text}\n${shareUrl}`);
+                showShareToast("✓ Download link copied to clipboard!");
+            } catch (err) {
+                window.prompt("Copy this link to share the app:", shareUrl);
+            }
+        }
+
+        function shareViaWhatsApp() {
+            const nameInput = document.getElementById('cfg-app-name') || document.getElementById('bp-app-name');
+            const appTitle = nameInput ? (nameInput.value || nameInput.textContent || 'iOS App') : 'iOS App';
+            const shareUrl = activeDownloadUrl || window.location.href;
+            const msg = `Install *${appTitle}* on your iPhone / iPad:\n${shareUrl}`;
+            const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+            window.open(waUrl, '_blank');
+        }
+
+        function showShareToast(message) {
+            const existing = document.getElementById('dynamic-share-toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.id = 'dynamic-share-toast';
+            toast.className = 'fixed bottom-6 right-6 z-[100] bg-emerald-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-2xl text-xs transition animate-bounce flex items-center gap-2';
+            toast.innerHTML = `<span>📤</span><span>${message}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2500);
+        }
+
+        async function startBuild() {
+            const btn = document.getElementById('btn-build');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            document.getElementById('progress-fill').style.width = '20%';
+            document.getElementById('build-status-badge').textContent = 'Building...';
+            document.getElementById('build-status-badge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-blue-900/60 text-blue-300';
+
+            const fd = new FormData();
+            fd.append('mode', currentMode);
+            fd.append('app_name', document.getElementById('cfg-app-name').value);
+            fd.append('bundle_id', document.getElementById('cfg-bundle-id').value);
+            fd.append('version_name', document.getElementById('cfg-version-name').value);
+            fd.append('screen_orientation', document.getElementById('cfg-orientation').value);
+            fd.append('theme_color', document.getElementById('cfg-theme-color').value);
+            fd.append('is_fullscreen', 'true');
+
+            const perms = [];
+            if (document.getElementById('perm-camera').checked) perms.push('NSCameraUsageDescription');
+            if (document.getElementById('perm-mic').checked) perms.push('NSMicrophoneUsageDescription');
+            if (document.getElementById('perm-location').checked) perms.push('NSLocationWhenInUseUsageDescription');
+            if (document.getElementById('perm-photos').checked) perms.push('NSPhotoLibraryAddUsageDescription');
+            fd.append('permissions', perms.join(','));
+
+            if (customIconPath) {
+                fd.append('custom_icon_path', customIconPath);
+            } else if (autoDetectedLogoPath) {
+                fd.append('auto_logo_path', autoDetectedLogoPath);
+            }
+
+            const customIconFileInput = document.getElementById('custom-icon-input').files[0];
+            if (customIconFileInput && !customIconPath) {
+                fd.append('custom_icon', customIconFileInput);
+            }
+
+            if (currentMode === 'url') {
+                fd.append('url', document.getElementById('input-url').value.trim());
+            } else {
+                const folderInput = document.getElementById('input-folder-path');
+                const folderVal = folderInput ? folderInput.value.trim() : '';
+                const zipFile = document.getElementById('input-file').files[0];
+                if (folderVal) {
+                    fd.set('mode', 'folder');
+                    fd.append('path', folderVal);
+                } else if (zipFile) {
+                    fd.set('mode', 'zip');
+                    fd.append('file', zipFile);
+                } else {
+                    alert('Please select a ZIP file or enter a project folder path');
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50');
+                    return;
+                }
+            }
+
+            log(`🚀 Launching Web-to-iOS Compilation Pipeline...`, 'text-blue-400');
+
+            try {
+                document.getElementById('progress-fill').style.width = '60%';
+                const res = await fetch('/api/build', { method: 'POST', body: fd });
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('progress-fill').style.width = '100%';
+                    document.getElementById('build-status-badge').textContent = 'Completed';
+                    document.getElementById('build-status-badge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300';
+                    
+                    log(`🎉 Build Succeeded!`, 'text-emerald-400 font-bold');
+                    log(`  📦 Standalone IPA: ${data.ipa_name} (${data.ipa_size_mb} MB)`, 'text-zinc-300');
+                    log(`  ⚡ Safari WebClip Profile: ${data.mobileconfig_name}`, 'text-zinc-300');
+                    log(`  🛠️ Swift Xcode Project: ${data.xcodeproj_zip_name}`, 'text-zinc-300');
+
+                    const profileUrl = data.profile_download_url || `/install-profile/${encodeURIComponent(data.mobileconfig_name)}`;
+                    const ipaUrl = data.ipa_download_url || `/download-raw/${encodeURIComponent(data.ipa_name)}`;
+                    const zipUrl = data.zip_download_url || `/download-raw/${encodeURIComponent(data.xcodeproj_zip_name)}`;
+
+                    // Update Right-side Deliverables Card
+                    document.getElementById('results-card').classList.remove('hidden');
+                    const liveUrl = data.target_web_url || data.app_preview_url;
+                    if (liveUrl) {
+                        const liveLink = document.getElementById('res-link-live');
+                        if (liveLink) {
+                            liveLink.href = liveUrl;
+                            liveLink.classList.remove('hidden');
+                        }
+                        const modalLiveLink = document.getElementById('modal-link-live');
+                        if (modalLiveLink) {
+                            modalLiveLink.href = liveUrl;
+                            modalLiveLink.classList.remove('hidden');
+                        }
+                    }
+                    const resProf = document.getElementById('res-link-profile');
+                    if (resProf) resProf.href = profileUrl;
+                    const resIpa = document.getElementById('res-link-ipa');
+                    if (resIpa) resIpa.href = ipaUrl;
+                    const resZip = document.getElementById('res-link-zip');
+                    if (resZip) resZip.href = zipUrl;
+                    const resSize = document.getElementById('res-ipa-size');
+                    if (resSize) resSize.textContent = `${data.ipa_size_mb} MB`;
+
+                    // Update Completion Download Modal with Direct Links
+                    const modalProf = document.getElementById('modal-dl-profile');
+                    if (modalProf) modalProf.href = profileUrl;
+                    const modalIpa = document.getElementById('modal-dl-ipa');
+                    if (modalIpa) modalIpa.href = ipaUrl;
+                    const modalSize = document.getElementById('modal-ipa-size');
+                    if (modalSize) modalSize.textContent = `${data.ipa_size_mb} MB`;
+                    const modalZip = document.getElementById('modal-dl-zip');
+                    if (modalZip) modalZip.href = zipUrl;
+
+                    // Update Simulator Modal Download Links
+                    const simTopIpa = document.getElementById('sim-top-dl-ipa');
+                    if (simTopIpa) simTopIpa.href = ipaUrl;
+                    const simTopProf = document.getElementById('sim-top-dl-profile');
+                    if (simTopProf) simTopProf.href = profileUrl;
+                    const simFootIpa = document.getElementById('sim-footer-dl-ipa');
+                    if (simFootIpa) simFootIpa.href = ipaUrl;
+                    const simFootProf = document.getElementById('sim-footer-dl-profile');
+                    if (simFootProf) simFootProf.href = profileUrl;
+
+                    activeDownloadUrl = data.download_url;
+                    activePreviewUrl = data.app_preview_url || data.target_web_url;
+                    activeTargetUrl = data.target_web_url || data.app_preview_url;
+
+                    if (data.qr_code_base64) {
+                        const qrImg = document.getElementById('modal-qr-img');
+                        if (qrImg) qrImg.src = data.qr_code_base64;
+                    }
+                    const shareInput = document.getElementById('modal-share-input');
+                    if (shareInput) shareInput.value = data.download_url;
+
+                    // Open the Deliverables & Share Hub immediately so user can download, share, or test!
+                    log(`🎉 Build Succeeded! Ready for Download, Sharing & Testing.`, 'text-emerald-400 font-bold');
+                    openQrModal();
+                } else {
+                    document.getElementById('progress-fill').style.width = '100%';
+                    document.getElementById('build-status-badge').textContent = 'Failed';
+                    document.getElementById('build-status-badge').className = 'text-xs font-mono px-2 py-0.5 rounded bg-rose-900/60 text-rose-300';
+                    log(`❌ Compilation Error: ${data.error}`, 'text-rose-400 font-bold');
+                }
+            } catch (err) {
+                log(`❌ Network/Server Error: ${err}`, 'text-rose-400');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+            }
+        }
+
+        async function inspectFolder() {
+            const folderInput = document.getElementById('input-folder-path');
+            const pathVal = folderInput ? folderInput.value.trim() : '';
+            if (!pathVal) return alert('Please enter a project directory path');
+
+            log(`[Inspector] Inspecting local project folder: ${pathVal}...`, 'text-indigo-400');
+            const fd = new FormData();
+            fd.append('mode', 'folder');
+            fd.append('path', pathVal);
+
+            try {
+                const res = await fetch('/api/inspect', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    populateBlueprint(data);
+                } else {
+                    log(`[Inspector Error] ${data.error}`, 'text-rose-400');
+                }
+            } catch (err) {
+                log(`[Inspector Error] ${err}`, 'text-rose-400');
+            }
+        }
+
+        function openSimulator() {
+            if (!activePreviewUrl) {
+                alert("Please compile an app first to test in the simulator.");
+                return;
+            }
+            closeQrModal();
+            if (typeof closeMobileAccessModal === 'function') closeMobileAccessModal();
+
+            const modal = document.getElementById('modal-simulator');
+            const iframe = document.getElementById('simulator-iframe');
+            const loader = document.getElementById('simulator-loader');
+            const title = document.getElementById('sim-app-title');
+
+            const nameInput = document.getElementById('cfg-app-name') || document.getElementById('bp-app-name') || document.getElementById('input-name');
+            const appTitle = nameInput ? (nameInput.value || nameInput.textContent || 'iOS App') : 'iOS App';
+
+            title.textContent = appTitle + ' (Simulator)';
+
+            if (loader) {
+                loader.classList.remove('hidden');
+                loader.style.opacity = '1';
+            }
+
+            iframe.onload = () => {
+                setTimeout(() => {
+                    if (loader) {
+                        loader.style.opacity = '0';
+                        setTimeout(() => loader.classList.add('hidden'), 250);
+                    }
+                }, 200);
+            };
+
+            iframe.src = activePreviewUrl;
+            modal.classList.remove('hidden');
+        }
+
+        function reloadSimulator() {
+            const iframe = document.getElementById('simulator-iframe');
+            const loader = document.getElementById('simulator-loader');
+            if (loader) {
+                loader.classList.remove('hidden');
+                loader.style.opacity = '1';
+            }
+            iframe.src = activePreviewUrl;
+        }
+
+        function closeSimulator() {
+            const modal = document.getElementById('modal-simulator');
+            if (modal) modal.classList.add('hidden');
+            const iframe = document.getElementById('simulator-iframe');
+            if (iframe) iframe.src = 'about:blank';
+        }
+
+        function openQrModal() {
+            closeSimulator();
+            if (typeof closeMobileAccessModal === 'function') closeMobileAccessModal();
+            const modal = document.getElementById('modal-qr');
+            if (modal) modal.classList.remove('hidden');
+            const shareInput = document.getElementById('modal-share-input');
+            if (shareInput && activeDownloadUrl) {
+                shareInput.value = activeDownloadUrl;
+            }
+        }
+        function closeQrModal() {
+            const modal = document.getElementById('modal-qr');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function openSurpriseModal() {
+            document.getElementById('modal-surprise').classList.remove('hidden');
+            const fd = new FormData();
+            fd.append('app_name', document.getElementById('cfg-app-name').value);
+            const res = await fetch('/api/surprise-me', { method: 'POST', body: fd });
+            const data = await res.json();
+            const list = document.getElementById('surprise-list');
+            list.innerHTML = '';
+            (data.innovations || []).forEach(inn => {
+                const item = document.createElement('div');
+                item.className = 'p-3 bg-zinc-900 rounded-xl border border-zinc-800';
+                item.innerHTML = `<h4 class="font-bold text-amber-300 text-xs">${inn.title}</h4><p class="text-zinc-400 text-xs mt-1">${inn.description}</p>`;
+                list.appendChild(item);
+            });
+        }
+        function closeSurpriseModal() {
+            document.getElementById('modal-surprise').classList.add('hidden');
+        }
+
+        function openSecurityModal() {
+            document.getElementById('modal-security').classList.remove('hidden');
+        }
+        function closeSecurityModal() {
+            document.getElementById('modal-security').classList.add('hidden');
+        }
+
+        async function openGrowthModal() {
+            document.getElementById('modal-growth').classList.remove('hidden');
+            const res = await fetch('/api/growth');
+            const data = await res.json();
+            const div = document.getElementById('growth-details');
+            div.innerHTML = `
+                <div class="grid grid-cols-2 gap-2 text-center">
+                    <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
+                        <span class="text-xl font-bold text-indigo-400">${data.level}</span>
+                        <p class="text-[10px] text-zinc-500">LEVEL</p>
+                    </div>
+                    <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
+                        <span class="text-xl font-bold text-purple-400">${data.xp}</span>
+                        <p class="text-[10px] text-zinc-500">EXPERIENCE XP</p>
+                    </div>
+                </div>
+                <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
+                    <p class="font-semibold text-white">Rank: ${data.rank}</p>
+                    <p class="text-zinc-400 mt-1">Total Builds: ${data.total_builds} &bull; Successful: ${data.successful_builds}</p>
+                </div>
+            `;
+        }
+        function closeGrowthModal() {
+            document.getElementById('modal-growth').classList.add('hidden');
+        }
+
+        async function openOutputDir() {
+            await fetch('/open-output');
+        }
+
+        async function checkNetworkStatus() {
+            try {
+                const res = await fetch('/api/models');
+                const data = await res.json();
+                const badge = document.getElementById('network-badge');
+                if (data.is_online === false) {
+                    badge.className = "px-3 py-1.5 rounded-xl bg-amber-950/60 border border-amber-500/40 text-xs text-amber-300 flex items-center gap-1.5";
+                    badge.innerHTML = "<span>📴</span><span>100% Offline Mode (Local Engine)</span>";
+                } else {
+                    badge.className = "px-3 py-1.5 rounded-xl bg-zinc-900 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-1.5";
+                    badge.innerHTML = "<span class='w-2 h-2 rounded-full bg-emerald-400'></span><span>Online Ready</span>";
+                }
+            } catch(e) {
+                const badge = document.getElementById('network-badge');
+                if (badge) {
+                    badge.className = "px-3 py-1.5 rounded-xl bg-amber-950/60 border border-amber-500/40 text-xs text-amber-300 flex items-center gap-1.5";
+                    badge.innerHTML = "<span>📴</span><span>100% Offline Mode (Local Engine)</span>";
+                }
+            }
+        }
+        checkNetworkStatus();
+
+        // Project Chhaya Mobile Remote Access
+        async function openMobileAccessModal() {
+            document.getElementById('modal-mobile-access').classList.remove('hidden');
+            await loadMobileAccessTelemetry();
+        }
+
+        function closeMobileAccessModal() {
+            document.getElementById('modal-mobile-access').classList.add('hidden');
+        }
+
+        async function loadMobileAccessTelemetry() {
+            try {
+                const res = await fetch('/api/mobile-access');
+                const data = await res.json();
+                
+                const qrImg = document.getElementById('mobile-qr-img');
+                const pubInput = document.getElementById('mobile-public-url');
+                const locInput = document.getElementById('mobile-local-url');
+                const badge = document.getElementById('mobile-tunnel-badge');
+                
+                if (data.qr_code_base64) {
+                    qrImg.src = data.qr_code_base64;
+                }
+                if (pubInput) {
+                    pubInput.value = data.public_url || 'Starting Cloudflare tunnel...';
+                }
+                if (locInput) {
+                    locInput.value = data.local_url || 'http://127.0.0.1:8992';
+                }
+                if (badge) {
+                    if (data.tunnel_active && data.public_url) {
+                        badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30';
+                        badge.innerText = '● 24/7 Cloud Active';
+                    } else {
+                        badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30';
+                        badge.innerText = 'Connecting...';
+                    }
+                }
+            } catch(e) {
+                console.error('Error loading mobile telemetry:', e);
+            }
+        }
+
+        function copyMobileUrl(type) {
+            const el = document.getElementById(type === 'public' ? 'mobile-public-url' : 'mobile-local-url');
+            if (el && el.value) {
+                navigator.clipboard.writeText(el.value).then(() => {
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed bottom-6 right-6 z-50 bg-blue-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-2xl text-xs transition animate-bounce';
+                    toast.innerText = `✓ Copied ${type === 'public' ? 'Worldwide Mobile URL' : 'Local Wi-Fi URL'}!`;
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 2500);
+                }).catch(() => {
+                    el.select();
+                    document.execCommand('copy');
+                });
+            }
+        }
+
+        async function toggleMobileTunnel() {
+            const btn = document.getElementById('btn-toggle-tunnel');
+            if (btn) btn.innerText = '🔄 Connecting Cloudflare...';
+            try {
+                await fetch('/api/mobile-access/start-tunnel', { method: 'POST' });
+                await new Promise(r => setTimeout(r, 1500));
+                await loadMobileAccessTelemetry();
+            } finally {
+                if (btn) btn.innerText = '🔄 Refresh Mobile Links';
+            }
+        }
+    </script>
+</body>
+</html>

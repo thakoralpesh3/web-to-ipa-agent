@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Web App">
+    <meta name="theme-color" content="#0f172a">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Cyber Arcade TV</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: linear-gradient(135deg, #090d16 0%, #1e1b4b 50%, #0f172a 100%);
+            color: #ffffff;
+            font-family: system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 36px;
+            border-radius: 28px;
+            border: 2px solid #38bdf8;
+            box-shadow: 0 0 35px rgba(56, 189, 248, 0.3);
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #38bdf8, #818cf8, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p.subtitle {
+            color: #94a3b8;
+            margin-bottom: 24px;
+            font-size: 1.1rem;
+        }
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .arcade-btn {
+            background: #1e293b;
+            border: 2px solid #475569;
+            color: #f8fafc;
+            padding: 18px 24px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .arcade-btn:hover {
+            background: #38bdf8;
+            color: #090d16;
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+        }
+        .counter-box {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #38bdf8;
+            margin-top: 16px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid #38bdf8;
+            border-radius: 20px;
+            color: #38bdf8;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 16px;
+        }
+    </style>
+
+    <!-- iOS Native Safe-Area & Viewport Optimizer -->
+    <style id="ios-safe-area-fix">
+        :root {
+            --sat: env(safe-area-inset-top, 0px);
+            --sar: env(safe-area-inset-right, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+            --sal: env(safe-area-inset-left, 0px);
+        }
+        html, body {
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            min-height: 100svh;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 CYBER ARCADE</h1>
+        <p class="subtitle">Compatible with Smartphones, Tablets, and Android TV Remotes</p>
+
+        <div class="grid-buttons">
+            <button class="arcade-btn" onclick="addScore(10)">⭐ +10 Points</button>
+            <button class="arcade-btn" onclick="addScore(50)">🚀 +50 Boost</button>
+            <button class="arcade-btn" onclick="addScore(100)">👑 +100 JackPot</button>
+            <button class="arcade-btn" onclick="resetScore()">🔄 Reset Score</button>
+        </div>
+
+        <div class="counter-box">
+            Score: <span id="score-val">0</span>
+        </div>
+
+        <div>
+            <span class="badge">📺 TV D-Pad Remote Ready (Arrow Keys / DPAD / OK)</span>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        function addScore(pts) {
+            score += pts;
+            document.getElementById('score-val').innerText = score;
+        }
+        function resetScore() {
+            score = 0;
+            document.getElementById('score-val').innerText = score;
+        }
+    </script>
+
+    <!-- iOS Web Audio Context Auto-Unlocker -->
+    <script id="ios-audio-unlocker">
+        (function() {
+            var unlocked = false;
+            function unlockAudio() {
+                if (unlocked) return;
+                var AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) {
+                    var ctx = new AudioCtx();
+                    var buf = ctx.createBuffer(1, 1, 22050);
+                    var src = ctx.createBufferSource();
+                    src.buffer = buf;
+                    src.connect(ctx.destination);
+                    if (src.start) src.start(0);
+                    if (ctx.resume) ctx.resume();
+                    unlocked = true;
+                }
+                document.removeEventListener('touchstart', unlockAudio, true);
+                document.removeEventListener('touchend', unlockAudio, true);
+                document.removeEventListener('click', unlockAudio, true);
+            }
+            document.addEventListener('touchstart', unlockAudio, { passive: true, capture: true });
+            document.addEventListener('touchend', unlockAudio, { passive: true, capture: true });
+            document.addEventListener('click', unlockAudio, { passive: true, capture: true });
+        })();
+    </script>
+</body>
+</html>
