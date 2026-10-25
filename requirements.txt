@@ -1,5 +1,5 @@
 aiofiles==25.1.0
-anyio==4.14.2
+anyio==4.15.1
 cairosvg>=2.7.0
 fastapi==0.141.1
 google-genai==2.20.0
