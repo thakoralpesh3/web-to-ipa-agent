@@ -25,6 +25,9 @@ on:
           - portrait
           - landscape
 
+permissions:
+  contents: read
+
 jobs:
   package-ios:
     name: Package iOS Deliverables
