@@ -8,6 +8,7 @@ Includes iOS Self-Healing, Dynamic Island Insets, Apple Asset Catalog, and Wi-Fi
 
 import sys
 import os
+import subprocess
 import argparse
 from pathlib import Path
 from rich.console import Console
@@ -120,25 +121,25 @@ def display_success_and_serve(res: dict, default_port: int = 8992, wait_for_user
     table.add_row("Xcode Project", "Native Swift / WKWebView Source", zip_name)
     console.print(table)
 
-    # Launch background QR Wi-Fi Sideload server
-    start_server_in_background(port=default_port)
-    dl_url = QRServer.get_download_url(ipa_name, port=default_port)
-
-    local_ip = QRServer.get_local_ip()
-    base_url = f"http://{local_ip}:{default_port}"
-    dl_table = Table(title="📥 Direct Download & Install Links", border_style="blue")
-    dl_table.add_column("Deliverable", style="bold white")
-    dl_table.add_column("Direct URL", style="underline cyan")
-    dl_table.add_row("⚡ 1-Tap Safari Profile", f"{base_url}/install-profile/{mobileconfig_name}")
-    dl_table.add_row("📦 Standalone Sideload IPA", f"{base_url}/download-raw/{ipa_name}")
-    dl_table.add_row("🛠️ Swift Xcode Project", f"{base_url}/download-raw/{zip_name}")
-    console.print(dl_table)
-
-    console.print(f"\n[bold green]⚡ Wi-Fi Sideload Landing Page:[/bold green] [underline cyan]{dl_url}[/underline cyan]")
-    console.print("[dim]Scan this QR code with your iPhone / iPad Camera to install directly over Wi-Fi:[/dim]\n")
-    QRServer.generate_terminal_qr(dl_url)
-
     if wait_for_user:
+        # Launch background QR Wi-Fi Sideload server
+        start_server_in_background(port=default_port)
+        dl_url = QRServer.get_download_url(ipa_name, port=default_port)
+
+        local_ip = QRServer.get_local_ip()
+        base_url = f"http://{local_ip}:{default_port}"
+        dl_table = Table(title="📥 Direct Download & Install Links", border_style="blue")
+        dl_table.add_column("Deliverable", style="bold white")
+        dl_table.add_column("Direct URL", style="underline cyan")
+        dl_table.add_row("⚡ 1-Tap Safari Profile", f"{base_url}/install-profile/{mobileconfig_name}")
+        dl_table.add_row("📦 Standalone Sideload IPA", f"{base_url}/download-raw/{ipa_name}")
+        dl_table.add_row("🛠️ Swift Xcode Project", f"{base_url}/download-raw/{zip_name}")
+        console.print(dl_table)
+
+        console.print(f"\n[bold green]⚡ Wi-Fi Sideload Landing Page:[/bold green] [underline cyan]{dl_url}[/underline cyan]")
+        console.print("[dim]Scan this QR code with your iPhone / iPad Camera to install directly over Wi-Fi:[/dim]\n")
+        QRServer.generate_terminal_qr(dl_url)
+
         try:
             console.print("\n[bold yellow]📡 Server running. Press Ctrl+C to stop.[/bold yellow]")
             import time
