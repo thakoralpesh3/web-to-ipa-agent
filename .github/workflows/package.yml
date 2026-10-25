@@ -1,0 +1,64 @@
+name: Package Web App into iOS IPA & Safari Profile
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Web URL to Package into iOS App'
+        required: false
+        default: 'https://example.com'
+      app_name:
+        description: 'Application Name'
+        required: false
+        default: 'ExampleApp'
+      bundle_id:
+        description: 'iOS Bundle Identifier'
+        required: false
+        default: 'com.web2ipa.example'
+      orientation:
+        description: 'Screen Orientation'
+        required: false
+        default: 'sensor'
+        type: choice
+        options:
+          - sensor
+          - portrait
+          - landscape
+
+jobs:
+  package-ios:
+    name: Package iOS Deliverables
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute Web2IPA Packaging
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          mkdir -p ~/Web2IPA_Output
+          python agent.py \
+            --url "${{ github.event.inputs.url }}" \
+            --name "${{ github.event.inputs.app_name }}" \
+            --bundle-id "${{ github.event.inputs.bundle_id }}" \
+            --orientation "${{ github.event.inputs.orientation }}" \
+            --no-serve
+
+      - name: Upload iOS App Deliverables
+        uses: actions/upload-artifact@v4
+        with:
+          name: web2ipa-deliverables-${{ github.run_number }}
+          path: /home/runner/Web2IPA_Output/
+          retention-days: 14

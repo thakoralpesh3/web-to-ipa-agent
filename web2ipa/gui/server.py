@@ -493,6 +493,54 @@ async def api_build(
 
     return JSONResponse(result)
 
+
+@app.get("/api/github/status")
+async def api_github_status():
+    try:
+        def _git(args):
+            r = subprocess.run(["git"] + args, cwd=str(PROJECT_ROOT), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            return r.returncode, r.stdout.strip()
+
+        rc, branch = _git(["branch", "--show-current"])
+        rc, commit = _git(["log", "-1", "--format=%h|%s|%an|%cr"])
+        rc, dirty = _git(["status", "--porcelain"])
+        rc, remote = _git(["remote", "get-url", "origin"])
+
+        parts = commit.split("|") if commit else ["", "", "", ""]
+        return {
+            "branch": branch or "main",
+            "commit_hash": parts[0] if len(parts) > 0 else "",
+            "commit_msg": parts[1] if len(parts) > 1 else "",
+            "commit_author": parts[2] if len(parts) > 2 else "",
+            "commit_time": parts[3] if len(parts) > 3 else "",
+            "is_dirty": bool(dirty),
+            "uncommitted_files": len(dirty.splitlines()) if dirty else 0,
+            "remote_url": remote or "https://github.com/thakoralpesh3/web-to-ipa-agent"
+        }
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+@app.post("/api/github/sync")
+async def api_github_sync(request: Request):
+    try:
+        body = {}
+        try:
+            body = await request.json()
+        except Exception:
+            pass
+        custom_msg = body.get("message") if isinstance(body, dict) else None
+        sync_script = PROJECT_ROOT / "sync_to_github.sh"
+        cmd = [str(sync_script)] + ([custom_msg] if custom_msg else [])
+        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=60)
+        return {
+            "success": res.returncode == 0,
+            "output": res.stdout
+        }
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
 def start_server(port: int = 8992, auto_open: bool = True):
     import uvicorn
     import webbrowser

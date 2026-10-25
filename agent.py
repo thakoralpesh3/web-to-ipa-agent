@@ -250,8 +250,27 @@ def main():
     parser.add_argument("--self-heal", type=str, help="Run self-healer diagnostics on folder")
     parser.add_argument("--inspect", type=str, help="Inspect website URL, ZIP or directory")
     parser.add_argument("--port", "-p", type=int, default=8992, help="Port for GUI or QR Server")
+    parser.add_argument("--no-serve", dest="serve", action="store_false", default=True, help="Do not start Wi-Fi sideload server after build")
+    parser.add_argument("--sync-github", nargs="?", const="", metavar="COMMIT_MSG", help="Commit and push all changes to GitHub origin main")
+    parser.add_argument("--watch-sync", action="store_true", help="Start background automatic GitHub sync daemon")
 
     args = parser.parse_args()
+
+    if args.sync_github is not None:
+        print_banner()
+        console.print("\n[bold cyan]🚀 Syncing Web-to-IPA Agent to GitHub...[/bold cyan]")
+        sync_script = Path(__file__).resolve().parent / "sync_to_github.sh"
+        msg = args.sync_github.strip()
+        cmd = [str(sync_script)] + ([msg] if msg else [])
+        subprocess.run(cmd)
+        return
+
+    if args.watch_sync:
+        print_banner()
+        console.print("\n[bold cyan]🔍 Starting Antigravity Auto-Sync Watcher Daemon...[/bold cyan]")
+        watcher_script = Path(__file__).resolve().parent / "scripts" / "auto_git_sync.py"
+        subprocess.run([sys.executable, str(watcher_script)])
+        return
 
     if args.growth:
         show_growth_memory()
@@ -299,7 +318,7 @@ def main():
             theme_color=args.theme
         )
         if res.get("success"):
-            display_success_and_serve(res, default_port=args.port)
+            display_success_and_serve(res, default_port=args.port, wait_for_user=args.serve)
         return
 
     if args.dir:
@@ -315,7 +334,7 @@ def main():
             theme_color=args.theme
         )
         if res.get("success"):
-            display_success_and_serve(res, default_port=args.port)
+            display_success_and_serve(res, default_port=args.port, wait_for_user=args.serve)
         return
 
     # Default to wizard if no argument supplied
