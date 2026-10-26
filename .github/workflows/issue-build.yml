@@ -1,0 +1,89 @@
+name: 24/7 Cloud Issue Build Bot
+
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  contents: write
+
+jobs:
+  issue_build:
+    name: Auto-Build iOS App from Issue
+    if: contains(github.event.issue.title, '[Build]') || contains(github.event.issue.title, '[iOS]') || contains(github.event.issue.title, '[IPA]') || contains(github.event.comment.body, '/build') || contains(github.event.issue.body, '/build')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Extract Web URL from Issue
+        id: extract
+        run: |
+          BODY="${{ github.event.comment.body || github.event.issue.body }}"
+          URL=$(echo "$BODY" | grep -o -E 'https?://[^ ]+' | head -n 1 || true)
+          APP_NAME=$(echo "${{ github.event.issue.title }}" | sed 's/\[.*\]//g' | xargs)
+          if [ -z "$APP_NAME" ]; then APP_NAME="iOSApp"; fi
+          echo "found_url=$URL" >> $GITHUB_OUTPUT
+          echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
+          echo "Target Web URL: $URL"
+          echo "App Name: $APP_NAME"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build iOS App & Profiles
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          mkdir -p ~/Web2IPA_Output
+          URL="${{ steps.extract.outputs.found_url }}"
+          if [ -z "$URL" ]; then URL="https://example.com"; fi
+          python agent.py \
+            --url "$URL" \
+            --name "${{ steps.extract.outputs.app_name }}" \
+            --bundle-id "com.web2ipa.app" \
+            --orientation "sensor" \
+            --no-serve
+
+      - name: Publish Deliverables to Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "issue-${{ github.event.issue.number }}-${{ github.run_number }}"
+          name: "iOS App Build for Issue #${{ github.event.issue.number }} (${{ steps.extract.outputs.app_name }})"
+          body: |
+            Automatically packaged into iOS App & 1-Tap Safari Profile by Web2IPA 24/7 Cloud Bot for Issue #${{ github.event.issue.number }}.
+          files: /home/runner/Web2IPA_Output/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Reply to Issue with Download Link
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const releaseUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/releases/tag/issue-${context.issue.number}-${context.runNumber}`;
+            const message = `### 🎉 Web2IPA iOS Build Completed Successfully!\n\n` +
+              `Your iOS Deliverables (1-Tap Safari Profile, Sideload IPA, and Swift Xcode project) have been generated and published.\n\n` +
+              `📦 **Download iOS Deliverables:**\n` +
+              `➡️ [Download from Release Assets](${releaseUrl})\n\n` +
+              `#### 📲 How to Install:\n` +
+              `- **Instant Safari Profile (.mobileconfig)**: Open the file in Safari on your iPhone/iPad to install directly.\n` +
+              `- **Standalone .ipa**: Sideload via AltStore, Sideloadly, or Scarlet.\n` +
+              `- **Xcode Project (.zip)**: Open in Xcode to build and sign with your Apple Developer Account.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
