@@ -547,6 +547,11 @@ def start_server(port: int = 8992, auto_open: bool = True):
     import threading
     import time
 
+    cloud_port = int(os.environ.get("PORT", port))
+    port = cloud_port
+    if os.environ.get("PORT"):
+        auto_open = False
+
     def open_browser():
         time.sleep(1.2)
         try:
