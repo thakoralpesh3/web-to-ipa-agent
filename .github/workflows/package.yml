@@ -24,9 +24,16 @@ on:
           - sensor
           - portrait
           - landscape
+      publish_release:
+        description: 'Publish iOS deliverables directly to GitHub Releases'
+        required: false
+        default: true
+        type: boolean
+  repository_dispatch:
+    types: [package_ios]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   package-ios:
@@ -52,11 +59,15 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           mkdir -p ~/Web2IPA_Output
+          URL="${{ github.event.inputs.url || github.event.client_payload.url || 'https://example.com' }}"
+          APP_NAME="${{ github.event.inputs.app_name || github.event.client_payload.app_name || 'ExampleApp' }}"
+          BUNDLE_ID="${{ github.event.inputs.bundle_id || github.event.client_payload.bundle_id || 'com.web2ipa.example' }}"
+          ORIENTATION="${{ github.event.inputs.orientation || github.event.client_payload.orientation || 'sensor' }}"
           python agent.py \
-            --url "${{ github.event.inputs.url }}" \
-            --name "${{ github.event.inputs.app_name }}" \
-            --bundle-id "${{ github.event.inputs.bundle_id }}" \
-            --orientation "${{ github.event.inputs.orientation }}" \
+            --url "$URL" \
+            --name "$APP_NAME" \
+            --bundle-id "$BUNDLE_ID" \
+            --orientation "$ORIENTATION" \
             --no-serve
 
       - name: Upload iOS App Deliverables
@@ -64,4 +75,23 @@ jobs:
         with:
           name: web2ipa-deliverables-${{ github.run_number }}
           path: /home/runner/Web2IPA_Output/
-          retention-days: 14
+          retention-days: 30
+
+      - name: Publish to GitHub Releases
+        if: ${{ github.event.inputs.publish_release != false }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ github.run_number }}-ios"
+          name: "Web2IPA Build #${{ github.run_number }} (${{ github.event.inputs.app_name || 'iOS App' }})"
+          body: |
+            ### 🍎 Web2IPA Cloud Deliverables Build #${{ github.run_number }}
+            - **App Name**: `${{ github.event.inputs.app_name || 'iOS App' }}`
+            - **Target URL**: `${{ github.event.inputs.url || 'https://example.com' }}`
+            - **Bundle ID**: `${{ github.event.inputs.bundle_id || 'com.web2ipa.app' }}`
+            
+            Download the signed iOS Safari Profile (`.mobileconfig`), standalone sideload `.ipa`, or native Swift Xcode source `.zip` directly from Assets below.
+          files: /home/runner/Web2IPA_Output/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
