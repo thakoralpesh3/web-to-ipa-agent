@@ -1,9 +1,16 @@
 # Web2IPA AI Agent: Universal Web to iOS IPA & Safari Profile Studio
 
 [![Web2IPA CI](https://github.com/thakoralpesh3/web-to-ipa-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/thakoralpesh3/web-to-ipa-agent/actions/workflows/ci.yml)
+[![Live 24/7 iOS Simulator](https://img.shields.io/badge/Live_Simulator-24%2F7_Online-brightgreen.svg)](https://thakoralpesh3.github.io/web-to-ipa-agent/)
 [![24/7 Cloud Issue Bot](https://github.com/thakoralpesh3/web-to-ipa-agent/actions/workflows/issue-build.yml/badge.svg)](https://github.com/thakoralpesh3/web-to-ipa-agent/actions/workflows/issue-build.yml)
 
 Autonomous AI Agent that transforms web applications and URLs into native iOS Apps (`.ipa`), Swift WKWebView Xcode projects (`.xcodeproj.zip`), and 1-Tap Safari Configuration Profiles (`.mobileconfig`). Includes iOS self-healing, safe-area insets, and 24/7 Cloud operation.
+
+---
+
+## 🍎 24/7 Live iOS Device Simulator (Zero Local Setup)
+Preview web apps on iPhone 16 Pro & iPad Pro, test Dynamic Island responsiveness, iOS safe-area insets, and orientations 24/7 directly in your browser:
+👉 **[Launch 24/7 Web-to-iOS Simulator](https://thakoralpesh3.github.io/web-to-ipa-agent/)**
 
 ---
 
