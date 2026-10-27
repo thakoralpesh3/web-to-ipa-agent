@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web2IPA Live iOS Simulator • 24/7 iPhone & iPad Cloud Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .iphone-bezel {
+      box-shadow: 0 25px 60px -15px rgba(0,0,0,0.9), 0 0 0 8px #1e293b, 0 0 0 10px #3b82f6;
+    }
+    .dynamic-island {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .dynamic-island:hover {
+      width: 160px;
+      height: 34px;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 font-bold text-lg text-white">
+        🍏
+      </div>
+      <div>
+        <h1 class="text-sm font-bold tracking-tight text-white flex items-center gap-2">
+          Web2IPA iOS Simulator
+          <span class="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 24/7 Cloud Live
+          </span>
+        </h1>
+        <p class="text-[11px] text-slate-400">Continuous iPhone 16 Pro & iPad Pro Live Preview Engine</p>
+      </div>
+    </div>
+
+    <!-- URL Bar -->
+    <div class="flex-1 max-w-2xl flex items-center gap-2">
+      <div class="relative flex-1">
+        <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-500 text-xs">🌐</span>
+        <input type="url" id="appUrl" value="https://news.ycombinator.com" placeholder="Enter any website URL (e.g. https://your-site.com)"
+               class="w-full bg-slate-950/80 border border-slate-700/80 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl pl-8 pr-24 py-2 text-xs text-white placeholder-slate-500 font-mono transition">
+        <button onclick="loadUrl()" class="absolute right-1 top-1 bottom-1 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition cursor-pointer">
+          Load
+        </button>
+      </div>
+      <button onclick="reloadFrame()" title="Reload Frame" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition cursor-pointer">
+        🔄
+      </button>
+    </div>
+
+    <!-- Right Actions -->
+    <div class="flex items-center gap-2">
+      <button onclick="openBuildModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-blue-500/25 transition flex items-center gap-1.5 cursor-pointer">
+        <span>⚡</span> Build iOS App
+      </button>
+      <a href="https://github.com/thakoralpesh3/web-to-ipa-agent" target="_blank" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition">
+        ⭐ GitHub
+      </a>
+    </div>
+  </header>
+
+  <!-- Simulator Main Stage -->
+  <main class="flex-1 p-4 lg:p-6 flex flex-col xl:flex-row gap-6 max-w-[1700px] w-full mx-auto items-start justify-center">
+
+    <!-- Simulator Frame Center -->
+    <div class="flex-1 w-full flex flex-col items-center justify-center">
+
+      <!-- Device Control Tabs -->
+      <div class="mb-4 bg-slate-900/90 border border-slate-800 rounded-2xl p-1.5 flex items-center gap-1.5 shadow-xl">
+        <button id="btnIphone" onclick="switchDevice('iphone')" class="px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-blue-600 text-white shadow-md cursor-pointer">
+          📱 iPhone 16 Pro
+        </button>
+        <button id="btnIphoneLandscape" onclick="switchDevice('iphone-landscape')" class="px-4 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+          🔄 iPhone (Landscape)
+        </button>
+        <button id="btnIpad" onclick="switchDevice('ipad')" class="px-4 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+          📱 iPad Pro (11")
+        </button>
+      </div>
+
+      <!-- Device Frame Container -->
+      <div id="simulatorStage" class="relative transition-all duration-300 flex justify-center items-center">
+        
+        <!-- iPhone 16 Pro Frame -->
+        <div id="deviceIphone" class="iphone-bezel w-[375px] h-[760px] rounded-[52px] bg-slate-900 border border-slate-700/60 relative overflow-hidden flex flex-col select-none transition-all duration-300">
+          
+          <!-- iOS Status Bar & Dynamic Island -->
+          <div class="h-11 bg-slate-950 flex items-center justify-between px-7 z-20 text-[11px] text-slate-200 font-semibold relative">
+            <span id="iosClock">9:41</span>
+            
+            <!-- Dynamic Island -->
+            <div class="dynamic-island w-28 h-6 bg-black rounded-full absolute left-1/2 -translate-x-1/2 top-2 flex items-center justify-between px-2 cursor-pointer shadow-lg">
+              <div class="w-2.5 h-2.5 rounded-full bg-slate-900 border border-slate-800"></div>
+              <div class="w-1.5 h-1.5 rounded-full bg-blue-500/80 animate-pulse"></div>
+            </div>
+
+            <div class="flex items-center gap-1.5 text-[11px]">
+              <span>5G</span>
+              <span class="text-xs">📶</span>
+              <div class="w-5 h-2.5 rounded-sm border border-slate-300 p-0.5 flex items-center">
+                <div class="h-full w-full bg-emerald-400 rounded-2xs"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Web Content Viewport -->
+          <div class="flex-1 w-full relative bg-slate-950 overflow-hidden">
+            <iframe id="iphoneIframe" src="https://news.ycombinator.com" class="w-full h-full border-0 bg-slate-950" allow="autoplay; camera; microphone; geolocation; accelerometer; gyroscope"></iframe>
+          </div>
+
+          <!-- Safari Bottom Toolbar / Home Indicator -->
+          <div class="h-8 bg-slate-950 flex flex-col items-center justify-center z-20">
+            <div class="w-36 h-1 rounded-full bg-slate-400/80"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Right Controls: Settings & Cloud Actions -->
+    <div class="w-full xl:w-96 space-y-4">
+
+      <!-- iOS App Features Card -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-2xl backdrop-blur-md">
+        <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-3">
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span>⚙️</span> iOS Display Options
+          </h3>
+          <span class="text-[10px] text-blue-400 font-mono bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-800/60">WebKit Engine</span>
+        </div>
+
+        <div class="space-y-2.5 text-xs">
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
+            <span class="text-slate-300">Dynamic Island Active</span>
+            <input type="checkbox" checked disabled class="accent-blue-500">
+          </label>
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
+            <span class="text-slate-300">Safe-Area Insets (Viewport Fit)</span>
+            <input type="checkbox" checked disabled class="accent-blue-500">
+          </label>
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
+            <span class="text-slate-300">Offline WKWebView Cache</span>
+            <input type="checkbox" checked disabled class="accent-blue-500">
+          </label>
+        </div>
+      </div>
+
+      <!-- Presets -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl backdrop-blur-md">
+        <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span>⚡</span> Quick Sample Web Apps
+        </h3>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="setSample('https://news.ycombinator.com')" class="p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left text-slate-300 font-medium transition cursor-pointer">
+            📰 Hacker News
+          </button>
+          <button onclick="setSample('https://en.m.wikipedia.org')" class="p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left text-slate-300 font-medium transition cursor-pointer">
+            📚 Wikipedia Mobile
+          </button>
+          <button onclick="setSample('https://2048game.com')" class="p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left text-slate-300 font-medium transition cursor-pointer">
+            🎮 2048 Game
+          </button>
+          <button onclick="setSample('https://excalidraw.com')" class="p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left text-slate-300 font-medium transition cursor-pointer">
+            🎨 Whiteboard App
+          </button>
+        </div>
+      </div>
+
+      <!-- Cloud Status -->
+      <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/40 border border-blue-900/30 rounded-3xl p-5 shadow-xl">
+        <div class="flex items-center gap-2 mb-2 text-blue-400 text-xs font-bold uppercase tracking-wider">
+          <span>☁️</span> 24/7 Cloud Operations
+        </div>
+        <p class="text-[11px] text-slate-400 leading-relaxed mb-3">
+          This iOS simulator runs natively on GitHub Pages with 100% uptime. You can test websites anytime and trigger cloud compilation to get 1-Tap Safari profiles.
+        </p>
+        <div class="text-[11px] font-mono text-slate-500 space-y-1">
+          <div>• Host: GitHub Pages (Global CDN)</div>
+          <div>• Status: Active 24/7</div>
+          <div>• Target: iOS 14.0 – iOS 18.x</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Build Modal -->
+  <div id="buildModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>🍏</span> Build iOS App via GitHub Cloud
+        </h3>
+        <button onclick="closeBuildModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-300">
+        Generate your 1-Tap Safari MobileConfig profile and standalone .ipa for <strong id="modalTargetUrl" class="text-blue-400"></strong>:
+      </p>
+
+      <div class="space-y-3 pt-2">
+        <a id="linkActionsBuild" href="https://github.com/thakoralpesh3/web-to-ipa-agent/actions/workflows/package.yml" target="_blank"
+           class="w-full p-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-between transition shadow-lg shadow-blue-500/20">
+          <span>📱 Trigger Build in GitHub Actions</span>
+          <span>➔</span>
+        </a>
+
+        <a id="linkIssueBuild" href="https://github.com/thakoralpesh3/web-to-ipa-agent/issues/new?title=%5BBuild%5D+App&body=url:+https://news.ycombinator.com" target="_blank"
+           class="w-full p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-between border border-slate-700 transition">
+          <span>🤖 Trigger via 24/7 Issue Bot</span>
+          <span>➔</span>
+        </a>
+      </div>
+
+      <div class="text-[11px] text-slate-500 text-center pt-2">
+        Produces instant 1-Tap Safari Profile, sideloadable IPA, and Xcode source.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateClocks() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('iosClock').textContent = timeStr;
+    }
+    setInterval(updateClocks, 1000);
+    updateClocks();
+
+    function loadUrl() {
+      let u = document.getElementById('appUrl').value.trim();
+      if (!u.startsWith('http://') && !u.startsWith('https://')) {
+        u = 'https://' + u;
+        document.getElementById('appUrl').value = u;
+      }
+      document.getElementById('iphoneIframe').src = u;
+    }
+
+    function reloadFrame() {
+      loadUrl();
+    }
+
+    function setSample(url) {
+      document.getElementById('appUrl').value = url;
+      loadUrl();
+    }
+
+    function switchDevice(mode) {
+      const iphone = document.getElementById('deviceIphone');
+      const btnIphone = document.getElementById('btnIphone');
+      const btnIphoneLandscape = document.getElementById('btnIphoneLandscape');
+      const btnIpad = document.getElementById('btnIpad');
+
+      [btnIphone, btnIphoneLandscape, btnIpad].forEach(b => {
+        b.className = 'px-4 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-1.5 cursor-pointer';
+      });
+
+      if (mode === 'iphone') {
+        iphone.style.width = '375px';
+        iphone.style.height = '760px';
+        iphone.style.borderRadius = '52px';
+        btnIphone.className = 'px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-blue-600 text-white shadow-md cursor-pointer';
+      } else if (mode === 'iphone-landscape') {
+        iphone.style.width = '760px';
+        iphone.style.height = '375px';
+        iphone.style.borderRadius = '40px';
+        btnIphoneLandscape.className = 'px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-blue-600 text-white shadow-md cursor-pointer';
+      } else if (mode === 'ipad') {
+        iphone.style.width = '640px';
+        iphone.style.height = '820px';
+        iphone.style.borderRadius = '32px';
+        btnIpad.className = 'px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-blue-600 text-white shadow-md cursor-pointer';
+      }
+    }
+
+    function openBuildModal() {
+      const u = document.getElementById('appUrl').value.trim();
+      document.getElementById('modalTargetUrl').textContent = u;
+      document.getElementById('linkIssueBuild').href = `https://github.com/thakoralpesh3/web-to-ipa-agent/issues/new?title=%5BBuild%5D+App&body=${encodeURIComponent(u)}`;
+      document.getElementById('buildModal').classList.remove('hidden');
+    }
+
+    function closeBuildModal() {
+      document.getElementById('buildModal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
