@@ -193,6 +193,15 @@ class IPABuilder:
             target_www.mkdir(parents=True, exist_ok=True)
             shutil.copytree(assets_staging, target_www, dirs_exist_ok=True)
 
+            # Electron desktop bundle integration (github.com/electron/electron)
+            try:
+                from web2ipa.electron_exporter import ElectronExporter
+                desktop_export_dir = OUTPUT_DIR / f"{clean_bundle_id}_electron_desktop"
+                ElectronExporter.export(desktop_export_dir, app_name=clean_app_name, entry_url_or_file="index.html", is_remote=bool(remote_url))
+                self.log("💻 Generated Electron Desktop cross-platform bundle for macOS/Linux/Win", 60)
+            except Exception as e:
+                self.log(f"Notice: Electron desktop generation ({e})", 60)
+
             current_stage = "PROJECT_GENERATED"
             CheckpointManager.commit_stage(session_id, "PROJECT_GENERATED")
 
