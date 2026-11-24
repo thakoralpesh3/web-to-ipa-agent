@@ -1221,6 +1221,27 @@ __LOAD_LOGIC__
             let sName = (body["filename"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             self.downloadAndShare(url: downloadUrl, suggestedName: sName)
 
+        case "triggerPiP":
+            triggerPiP()
+        case "seekRelative":
+            if let sec = body["seconds"] as? Int {
+                seekRelative(sec)
+            }
+        case "setPlaybackSpeed":
+            if let spd = body["speed"] as? Double {
+                setPlaybackSpeed(Float(spd))
+            }
+        case "toggleScreenLock":
+            isScreenLocked.toggle()
+            showHud(icon: isScreenLocked ? "lock.fill" : "lock.open.fill", text: isScreenLocked ? "Screen Locked" : "Unlocked")
+        case "setOttNavVisible":
+            if let visible = body["visible"] as? Bool {
+                UIView.animate(withDuration: 0.25) {
+                    self.ottBottomNav.alpha = visible ? 1 : 0
+                    self.ottControlsContainer.alpha = visible ? 1 : 0
+                }
+            }
+
         default:
             break
         }
