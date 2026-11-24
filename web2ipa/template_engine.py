@@ -415,6 +415,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 import UIKit
 import WebKit
 import AVKit
+import AVFoundation
 
 class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
 
@@ -422,6 +423,7 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate, W
     var progressView: UIProgressView!
     var refreshControl: UIRefreshControl!
     private var progressObserver: NSKeyValueObservation?
+    private let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
 
     override var prefersStatusBarHidden: Bool {
         return __FULLSCREEN__
@@ -434,6 +436,7 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate, W
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        configureAudioSession()
         setupWebView()
         setupProgressBar()
         loadContent()
@@ -441,6 +444,13 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate, W
 
     private func setupUI() {
         view.backgroundColor = UIColor(hex: "__THEME_COLOR__") ?? .black
+    }
+
+    private func configureAudioSession() {
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, options: [.allowAirPlay])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {}
     }
 
     private func setupWebView() {
@@ -542,6 +552,7 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate, W
         let config = WKWebViewConfiguration()
         config.userContentController = contentController
         config.allowsInlineMediaPlayback = true
+        config.allowsPictureInPictureMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         config.preferences.javaScriptCanOpenWindowsAutomatically = true
         if #available(iOS 15.4, *) {
@@ -593,6 +604,7 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate, W
     }
 
     @objc private func handleRefresh() {
+        impactFeedback.impactOccurred()
         webView.reload()
     }
 
