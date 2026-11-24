@@ -425,6 +425,16 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate, W
     private var progressObserver: NSKeyValueObservation?
     private let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
 
+    // MARK: - OTT Streaming Player HUD & Controls
+    private var ottBottomNav: UIVisualEffectView!
+    private var ottControlsContainer: UIVisualEffectView!
+    private var ottCenterHud: UIVisualEffectView!
+    private var ottHudLabel: UILabel!
+    private var ottHudIcon: UIImageView!
+    private var isScreenLocked = false
+    private var ottControlsTimer: Timer?
+    private var panStartY: CGFloat = 0
+
     override var prefersStatusBarHidden: Bool {
         return __FULLSCREEN__
     }
@@ -439,6 +449,7 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate, W
         configureAudioSession()
         setupWebView()
         setupProgressBar()
+        setupOTTInteractivity()
         loadContent()
     }
 
@@ -549,6 +560,44 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate, W
         let userScript = WKUserScript(source: downloadBridgeJS, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
         contentController.addUserScript(userScript)
 
+        let ottVideoHelperJS = \"\"\"
+        (function() {
+            if (window.__web2ipa_ott_injected) return;
+            window.__web2ipa_ott_injected = true;
+            window.__ottSeek = function(sec) {
+                var v = document.querySelector('video');
+                if (v) {
+                    v.currentTime = Math.max(0, Math.min(v.duration || 999999, v.currentTime + sec));
+                    return true;
+                }
+                return false;
+            };
+            window.__ottSetSpeed = function(spd) {
+                var v = document.querySelector('video');
+                if (v) {
+                    v.playbackRate = spd;
+                    return true;
+                }
+                return false;
+            };
+            window.__ottTogglePlay = function() {
+                var v = document.querySelector('video');
+                if (v) {
+                    if (v.paused) { v.play(); } else { v.pause(); }
+                    return !v.paused;
+                }
+                return false;
+            };
+            window.OTTPlayer = {
+                seek: window.__ottSeek,
+                setSpeed: window.__ottSetSpeed,
+                togglePlay: window.__ottTogglePlay
+            };
+        })();
+        \"\"\"
+        let ottScript = WKUserScript(source: ottVideoHelperJS, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+        contentController.addUserScript(ottScript)
+
         let config = WKWebViewConfiguration()
         config.userContentController = contentController
         config.allowsInlineMediaPlayback = true
@@ -616,6 +665,336 @@ __LOAD_LOGIC__
         if let offlineUrl = Bundle.main.url(forResource: "offline", withExtension: "html") {
             webView.loadFileURL(offlineUrl, allowingReadAccessTo: offlineUrl.deletingLastPathComponent())
         }
+    }
+
+    // MARK: - OTT Interactivity & Streaming Controls
+
+    private func setupOTTInteractivity() {
+        setupCenterHUD()
+        setupFloatingControls()
+        setupBottomNav()
+        setupGestures()
+    }
+
+    private func setupCenterHUD() {
+        let blur = UIBlurEffect(style: .systemUltraThinMaterialDark)
+        ottCenterHud = UIVisualEffectView(effect: blur)
+        ottCenterHud.layer.cornerRadius = 16
+        ottCenterHud.layer.masksToBounds = true
+        ottCenterHud.alpha = 0
+        ottCenterHud.isUserInteractionEnabled = false
+        ottCenterHud.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(ottCenterHud)
+
+        ottHudIcon = UIImageView()
+        ottHudIcon.tintColor = .white
+        ottHudIcon.contentMode = .scaleAspectFit
+        ottHudIcon.translatesAutoresizingMaskIntoConstraints = false
+        ottCenterHud.contentView.addSubview(ottHudIcon)
+
+        ottHudLabel = UILabel()
+        ottHudLabel.textColor = .white
+        ottHudLabel.font = UIFont.systemFont(ofSize: 15, weight: .bold)
+        ottHudLabel.textAlignment = .center
+        ottHudLabel.translatesAutoresizingMaskIntoConstraints = false
+        ottCenterHud.contentView.addSubview(ottHudLabel)
+
+        NSLayoutConstraint.activate([
+            ottCenterHud.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            ottCenterHud.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            ottCenterHud.heightAnchor.constraint(equalToConstant: 72),
+            ottCenterHud.widthAnchor.constraint(greaterThanOrEqualToConstant: 130),
+
+            ottHudIcon.centerXAnchor.constraint(equalTo: ottCenterHud.contentView.centerXAnchor),
+            ottHudIcon.topAnchor.constraint(equalTo: ottCenterHud.contentView.topAnchor, constant: 12),
+            ottHudIcon.widthAnchor.constraint(equalToConstant: 24),
+            ottHudIcon.heightAnchor.constraint(equalToConstant: 24),
+
+            ottHudLabel.centerXAnchor.constraint(equalTo: ottCenterHud.contentView.centerXAnchor),
+            ottHudLabel.topAnchor.constraint(equalTo: ottHudIcon.bottomAnchor, constant: 4),
+            ottHudLabel.leadingAnchor.constraint(equalTo: ottCenterHud.contentView.leadingAnchor, constant: 16),
+            ottHudLabel.trailingAnchor.constraint(equalTo: ottCenterHud.contentView.trailingAnchor, constant: -16)
+        ])
+    }
+
+    private func setupFloatingControls() {
+        let blur = UIBlurEffect(style: .systemUltraThinMaterialDark)
+        ottControlsContainer = UIVisualEffectView(effect: blur)
+        ottControlsContainer.layer.cornerRadius = 24
+        ottControlsContainer.layer.masksToBounds = true
+        ottControlsContainer.layer.borderColor = UIColor.white.withAlphaComponent(0.15).cgColor
+        ottControlsContainer.layer.borderWidth = 1
+        ottControlsContainer.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(ottControlsContainer)
+
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = 16
+        stack.alignment = .center
+        stack.distribution = .equalCentering
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        ottControlsContainer.contentView.addSubview(stack)
+
+        let btnRewind = createOttButton(systemName: "gobackward.10", action: #selector(handleOttRewind))
+        let btnPlay = createOttButton(systemName: "play.fill", action: #selector(handleOttPlayPause))
+        let btnForward = createOttButton(systemName: "goforward.10", action: #selector(handleOttForward))
+        let btnSpeed = createOttButton(systemName: "speedometer", action: #selector(handleOttSpeed))
+        let btnPip = createOttButton(systemName: "pip.enter", action: #selector(handleOttPip))
+        let btnLock = createOttButton(systemName: "lock.open.fill", action: #selector(handleOttLock))
+
+        [btnRewind, btnPlay, btnForward, btnSpeed, btnPip, btnLock].forEach { stack.addArrangedSubview($0) }
+
+        NSLayoutConstraint.activate([
+            ottControlsContainer.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            ottControlsContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            ottControlsContainer.heightAnchor.constraint(equalToConstant: 48),
+            stack.leadingAnchor.constraint(equalTo: ottControlsContainer.contentView.leadingAnchor, constant: 18),
+            stack.trailingAnchor.constraint(equalTo: ottControlsContainer.contentView.trailingAnchor, constant: -18),
+            stack.centerYAnchor.constraint(equalTo: ottControlsContainer.contentView.centerYAnchor)
+        ])
+    }
+
+    private func setupBottomNav() {
+        let blur = UIBlurEffect(style: .systemUltraThinMaterialDark)
+        ottBottomNav = UIVisualEffectView(effect: blur)
+        ottBottomNav.layer.cornerRadius = 26
+        ottBottomNav.layer.masksToBounds = true
+        ottBottomNav.layer.borderColor = UIColor.white.withAlphaComponent(0.12).cgColor
+        ottBottomNav.layer.borderWidth = 1
+        ottBottomNav.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(ottBottomNav)
+
+        let navStack = UIStackView()
+        navStack.axis = .horizontal
+        navStack.distribution = .fillEqually
+        navStack.alignment = .center
+        navStack.translatesAutoresizingMaskIntoConstraints = false
+        ottBottomNav.contentView.addSubview(navStack)
+
+        let items: [(String, String, Selector)] = [
+            ("house.fill", "Home", #selector(handleNavHome)),
+            ("magnifyingglass", "Search", #selector(handleNavSearch)),
+            ("plus.rectangle.on.folder.fill", "Watchlist", #selector(handleNavWatchlist)),
+            ("arrow.down.circle.fill", "Downloads", #selector(handleNavDownloads)),
+            ("slider.horizontal.3", "More", #selector(handleNavMore))
+        ]
+
+        for (icon, title, sel) in items {
+            let btn = createNavItem(icon: icon, title: title, action: sel)
+            navStack.addArrangedSubview(btn)
+        }
+
+        NSLayoutConstraint.activate([
+            ottBottomNav.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            ottBottomNav.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            ottBottomNav.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
+            ottBottomNav.heightAnchor.constraint(equalToConstant: 58),
+
+            navStack.leadingAnchor.constraint(equalTo: ottBottomNav.contentView.leadingAnchor, constant: 8),
+            navStack.trailingAnchor.constraint(equalTo: ottBottomNav.contentView.trailingAnchor, constant: -8),
+            navStack.centerYAnchor.constraint(equalTo: ottBottomNav.contentView.centerYAnchor),
+            navStack.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+
+    private func setupGestures() {
+        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
+        doubleTap.numberOfTapsRequired = 2
+        view.addGestureRecognizer(doubleTap)
+
+        let singleTap = UITapGestureRecognizer(target: self, action: #selector(handleSingleTap(_:)))
+        singleTap.numberOfTapsRequired = 1
+        singleTap.require(toFail: doubleTap)
+        view.addGestureRecognizer(singleTap)
+
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
+        view.addGestureRecognizer(pan)
+    }
+
+    @objc private func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
+        if isScreenLocked { return }
+        let location = gesture.location(in: view)
+        let isLeft = location.x < (view.bounds.width / 2)
+        let seekDelta = isLeft ? -10 : 10
+        impactFeedback.impactOccurred()
+        seekRelative(seekDelta)
+        showHud(icon: isLeft ? "gobackward.10" : "goforward.10", text: isLeft ? "-10s" : "+10s")
+    }
+
+    @objc private func handleSingleTap(_ gesture: UITapGestureRecognizer) {
+        if isScreenLocked {
+            showHud(icon: "lock.fill", text: "Screen Locked")
+            return
+        }
+        let shouldHide = (ottBottomNav.alpha > 0.1)
+        UIView.animate(withDuration: 0.3) {
+            self.ottBottomNav.alpha = shouldHide ? 0 : 1
+            self.ottControlsContainer.alpha = shouldHide ? 0 : 1
+        }
+    }
+
+    @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
+        if isScreenLocked { return }
+        let loc = gesture.location(in: view)
+        let translation = gesture.translation(in: view)
+
+        if gesture.state == .began {
+            panStartY = loc.y
+        } else if gesture.state == .changed {
+            let deltaY = -translation.y
+            if loc.x < view.bounds.width / 2 {
+                let current = UIScreen.main.brightness
+                let newBrightness = max(0.0, min(1.0, current + (deltaY / 2000.0)))
+                UIScreen.main.brightness = newBrightness
+                showHud(icon: "sun.max.fill", text: "\\(Int(newBrightness * 100))%")
+            } else {
+                let pct = max(0, min(100, Int(100 - (loc.y / view.bounds.height * 100))))
+                showHud(icon: "speaker.wave.3.fill", text: "\\(pct)%")
+            }
+        }
+    }
+
+    private func showHud(icon: String, text: String) {
+        ottHudIcon.image = UIImage(systemName: icon)
+        ottHudLabel.text = text
+        UIView.animate(withDuration: 0.2) {
+            self.ottCenterHud.alpha = 1
+        }
+        ottControlsTimer?.invalidate()
+        ottControlsTimer = Timer.scheduledTimer(withTimeInterval: 1.2, repeats: false) { [weak self] _ in
+            UIView.animate(withDuration: 0.3) {
+                self?.ottCenterHud.alpha = 0
+            }
+        }
+    }
+
+    @objc private func handleOttRewind() {
+        impactFeedback.impactOccurred()
+        seekRelative(-10)
+        showHud(icon: "gobackward.10", text: "-10s")
+    }
+
+    @objc private func handleOttForward() {
+        impactFeedback.impactOccurred()
+        seekRelative(10)
+        showHud(icon: "goforward.10", text: "+10s")
+    }
+
+    @objc private func handleOttPlayPause() {
+        impactFeedback.impactOccurred()
+        webView.evaluateJavaScript("window.__ottTogglePlay ? window.__ottTogglePlay() : false") { [weak self] res, _ in
+            let isPlaying = (res as? Bool) ?? true
+            self?.showHud(icon: isPlaying ? "play.fill" : "pause.fill", text: isPlaying ? "Playing" : "Paused")
+        }
+    }
+
+    @objc private func handleOttSpeed() {
+        impactFeedback.impactOccurred()
+        let alert = UIAlertController(title: "Playback Speed", message: "Select video speed", preferredStyle: .actionSheet)
+        let speeds: [Float] = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
+        for spd in speeds {
+            alert.addAction(UIAlertAction(title: "\\(spd)x", style: .default) { [weak self] _ in
+                self?.setPlaybackSpeed(spd)
+                self?.showHud(icon: "speedometer", text: "\\(spd)x")
+            })
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        if let pop = alert.popoverPresentationController {
+            pop.sourceView = ottControlsContainer
+            pop.sourceRect = ottControlsContainer.bounds
+        }
+        present(alert, animated: true)
+    }
+
+    @objc private func handleOttPip() {
+        impactFeedback.impactOccurred()
+        triggerPiP()
+    }
+
+    @objc private func handleOttLock() {
+        impactFeedback.impactOccurred()
+        isScreenLocked.toggle()
+        showHud(icon: isScreenLocked ? "lock.fill" : "lock.open.fill", text: isScreenLocked ? "Screen Locked" : "Unlocked")
+    }
+
+    private func seekRelative(_ seconds: Int) {
+        webView.evaluateJavaScript("if (window.__ottSeek) { window.__ottSeek(\\(seconds)); }", completionHandler: nil)
+    }
+
+    private func setPlaybackSpeed(_ speed: Float) {
+        webView.evaluateJavaScript("if (window.__ottSetSpeed) { window.__ottSetSpeed(\\(speed)); }", completionHandler: nil)
+    }
+
+    private func triggerPiP() {
+        webView.evaluateJavaScript(\"\"\"
+        var v = document.querySelector('video');
+        if (v && v.webkitSetPresentationMode) {
+            v.webkitSetPresentationMode(v.webkitPresentationMode === 'picture-in-picture' ? 'inline' : 'picture-in-picture');
+        }
+        \"\"\", completionHandler: nil)
+    }
+
+    private func createOttButton(systemName: String, action: Selector) -> UIButton {
+        let btn = UIButton(type: .system)
+        let img = UIImage(systemName: systemName)?.withRenderingMode(.alwaysTemplate)
+        btn.setImage(img, for: .normal)
+        btn.tintColor = .white
+        btn.addTarget(self, action: action, for: .touchUpInside)
+        btn.widthAnchor.constraint(equalToConstant: 36).isActive = true
+        btn.heightAnchor.constraint(equalToConstant: 36).isActive = true
+        return btn
+    }
+
+    private func createNavItem(icon: String, title: String, action: Selector) -> UIButton {
+        let btn = UIButton(type: .system)
+        if #available(iOS 15.0, *) {
+            var config = UIButton.Configuration.plain()
+            config.image = UIImage(systemName: icon)
+            config.imagePlacement = .top
+            config.imagePadding = 3
+            config.title = title
+            config.baseForegroundColor = .white
+            btn.configuration = config
+        } else {
+            btn.setImage(UIImage(systemName: icon), for: .normal)
+            btn.setTitle(title, for: .normal)
+            btn.tintColor = .white
+            btn.setTitleColor(.white, for: .normal)
+        }
+        btn.addTarget(self, action: action, for: .touchUpInside)
+        return btn
+    }
+
+    @objc private func handleNavHome() {
+        impactFeedback.impactOccurred()
+        loadContent()
+    }
+
+    @objc private func handleNavSearch() {
+        impactFeedback.impactOccurred()
+        webView.evaluateJavaScript("if (window.onOttNav) window.onOttNav('search');", completionHandler: nil)
+    }
+
+    @objc private func handleNavWatchlist() {
+        impactFeedback.impactOccurred()
+        webView.evaluateJavaScript("if (window.onOttNav) window.onOttNav('watchlist');", completionHandler: nil)
+    }
+
+    @objc private func handleNavDownloads() {
+        impactFeedback.impactOccurred()
+        showHud(icon: "arrow.down.circle.fill", text: "Downloads")
+    }
+
+    @objc private func handleNavMore() {
+        impactFeedback.impactOccurred()
+        let alert = UIAlertController(title: "More Options", message: nil, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "Reload Player", style: .default) { [weak self] _ in self?.webView.reload() })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        if let pop = alert.popoverPresentationController {
+            pop.sourceView = ottBottomNav
+            pop.sourceRect = ottBottomNav.bounds
+        }
+        present(alert, animated: true)
     }
 
     // MARK: - WKNavigationDelegate
